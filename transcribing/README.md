@@ -75,3 +75,7 @@ ffmpeg input.mp4 output.mp3
 # Location of downloaded language models:
 
     C:\Users\jonaz\.cache\whisper
+    
+*# TODO*
+- Add example files (audio, video, text output)
+- Explain which PyTorch to pick
