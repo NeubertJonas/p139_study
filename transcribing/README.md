@@ -76,6 +76,6 @@ ffmpeg input.mp4 output.mp3
 
     C:\Users\jonaz\.cache\whisper
     
-*# TODO*
+# *TODO*
 - Add example files (audio, video, text output)
 - Explain which PyTorch to pick
