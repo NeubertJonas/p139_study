@@ -1,0 +1,9 @@
+---
+bibliography: references.bib
+---
+
+# Selection of Seed Words for the Chain Free Association Task
+
+This will be the write-up of the used code for a future method section.
+
+@scott2019
