@@ -106,7 +106,7 @@ def compare(audio):
     return (result)
 
 
-# TODO: Figure out best setting for audio/video conversion via ffmpeg. (uUse -crf 18 for now)
+# TODO: Figure out best setting for audio/video conversion via ffmpeg. (use -crf 18 for now)
 
 if __name__ == "__main__":
     main()
