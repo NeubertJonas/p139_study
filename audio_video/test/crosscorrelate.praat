@@ -1,3 +1,8 @@
+# This script was adapted from the Praat script published by The Bielefeld Dialogue Systems Group (Prof. David Schlangen)
+# The original script, written by Spyros Kousidis, can be found here:
+# http://www.dsg-bielefeld.de/dsg_wp/sync-your-videos-using-reference-audio/
+# http://www.dsg-bielefeld.de/dsg_wp/wp-content/uploads/2014/10/video_syncing_fun.pdf
+
 form Cross Correlate two Sounds
     sentence Input_sound_1
     sentence Input_sound_2
