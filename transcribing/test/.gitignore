@@ -1,2 +1,5 @@
 # Software, such as Praat.exe
 *.exe
+
+# Temp. CodeRunner file
+tempCodeRunnerFile.py
