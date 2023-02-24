@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "github.copilot",
+        "formulahendry.code-runner",
+        "github.vscode-pull-request-github",
+        "ms-python.vscode-pylance",
+        "ms-python.pylint",
+        "ms-python.python"
+    ]
+}
