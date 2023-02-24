@@ -92,7 +92,7 @@ def compare(audio):
     # Webcam (EEG lab): 48kHz
     # iPad: 44.1kHz
     # ffmpeg -i input.wav -ar 48k output.wav
-    # TODO: Compare sampling rates of audio files and convert if necessary
+    # Optional: Compare sampling rates of audio files and convert if necessary
     # Not sure how to determine sampling rate without relying on more packages
     # So instead I'll just convert to 48khz every time and hope for the best (see line 70)
     # Converting every time when extracting from video
