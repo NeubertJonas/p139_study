@@ -25,15 +25,15 @@ Please note that the most recent version of Python, which is 3.11.x, is not comp
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 ```
 
-\2. Close Powershell and open a new elevated terminal
+2. Close Powershell and open a new elevated terminal
 
-\3. Next, we're installing Python 3.10.x, FFmpeg, Git, and Visual Studio Code (VS Code). The latter is only a recommendation, other integrated development environments (IDEs) work as well. I'm also recommending to install GitHub and the GitHub extensions, so you can easily download the code from the repository and contribute to it.
+3. Next, we're installing Python 3.10.x, FFmpeg, Git, and Visual Studio Code (VS Code). The latter is only a recommendation, other integrated development environments (IDEs) work as well. I'm also recommending to install GitHub and the GitHub extensions, so you can easily download the code from the repository and contribute to it.
 
 ``` powershell
 choco install python310 ffmpeg vscode git vscode-pull-request-github
 ```
 
-\4. (Optional) There are a few useful extensions for Visual Studio Code, which make your life much easier when working with Python (or other languages). You can install them within VS Code itself.
+4. (Optional) There are a few useful extensions for Visual Studio Code, which make your life much easier when working with Python (or other languages). You can install them within VS Code itself.
 I recommend the following extensions: Python, Pylance, Pylint, Code Runner, GitHub Copilot
 
 ### Downloading the Repository
