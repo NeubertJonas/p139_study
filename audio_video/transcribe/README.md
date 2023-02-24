@@ -1,17 +1,49 @@
 # How to setup OpenAI's Whisper on VSC
 
-*Last update: 22.01.2022*
-
 Required Python version: 3.9.9 (recommended); 3.9.13 (works as well); newer versions are not supported\
 Make sure to select 3.9.13 in the bottom right.
 
 *Optional: install extensions: CodeRunner, Python, Pylance*
 
+## In PowerShell or Terminal
+Housekeeping: Just upgrade pip via administrator terminal.
+
+
+First some housekeeping on a fresh installation of python. Make sure pip and setuptool are up-to-date.
+And then install the wheel package (required for installing some of the packages)
+``` powershell
+pip list --outdated
+python -m pip install --upgrade pip
+pip install setuptools --upgrade
+pip install wheel
+```
+## FFmpeg
+
+Install FFmpeg. Easiest way to do this is via the chocolatey package manager. 
+
 ## Virtual Environment
+
+Setup virtual environment, update essential packages
+
+``` powershell
+py -m pip install --upgrade pip setuptools wheel
+py -m pip install -r requirements.txt
+# If you have a compatible nVidia GPU:
+py -m pip install -r requirements_nvidia.txt
+```
 
 Create virtual environment in the workspace (folder) by going to the command palette (Ctrl+Shift+P)\
 Setup with Python 3.9.13\
 run "Python -V" to confirm correct version in the terminal
+Visual Studio Code will offer you to use a requirements file to automatically install packages.
+Pick "requirements_nvidia.txt" if you have a compatible nVidia GPU, which allows for much faster
+transcription via nVidia's CUDA cores. Have a look here to check if your GPU is compatible:
+TODO: Add link.
+Otherwise, use "requirements.txt"
+
+The most recent version of Whisper will be installed. This also includes PyTorch and a few other packages.
+
+The included settings.json in the .vscode folder tells VSC to automatically run the virtual environment in the terminal. Open a new terminal and you should see (.venv) at the beginning of each command. Run "pip list" to see the list of installed packages.
 
 ## Install PyTorch
 
