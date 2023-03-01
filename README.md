@@ -6,7 +6,7 @@ A collection of code for the ongoing study. Brief overview of the repository:
 
 ### transcribe
 
-Instructions to run OpenAI's Whisper in Python which allows for automatic transcription of audio to text.
+Instructions to run OpenAI's Whisper in Python which allows for automatic transcription of audio to text!
 
 ### sync
 
