@@ -1,6 +1,6 @@
 # Working with Audio & Video Files
 
-Python tools to (a) transcribe audio files into text via OpenAi's Whisper tool and (b) sync audio from an external microphone with a video recording with the help of Praat. All the code can be found the _transcribe_ and _sync_ folders, respectively.
+Python tools to (a) transcribe audio files into text via OpenAi's Whisper tool and (b) sync audio from an external microphone with a video recording with the help of Praat. All the code can be found in the _transcribe_ and _sync_ folders, respectively.
 This README contains instructions on how to setup the Python environment in Microsoft's Visual Studio Code on Windows. Naturally, the code also works with other software and on other platforms. You just have to adapt the instructions slightly yourself.
 
 ## Prerequisites Overview
