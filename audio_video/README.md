@@ -85,7 +85,7 @@ The basic command is:
 whisper audiofile.mp3
 # Define the language model
 whisper audiofile.mp3 --model medium.en
-# Make sure the terminal is in the correct folder by using the cd command
+# Make sure the terminal is in the correct folder by using the **cd** command
 cd audio_video/transcribe/examples
 # You can also analyse multiple files at once (in this case the included example files) and limit the output to a specific format
 whisper abstract.mp3 emotional.mp3 --model medium.en --output_format txt
