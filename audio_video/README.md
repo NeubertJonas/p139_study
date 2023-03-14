@@ -101,7 +101,7 @@ This might take a while, but only needs to be done once.
 Whisper only works with audio files (.mp3, .wav, etc.), so audio extraction is required when working with video files. This can be easily achieved with software such as ffmpeg
 
 ``` powershell
-ffmpeg input.mp4 output.mp3
+ffmpeg -i input.mp4 -vn output.mp3
 ```
 
 ## Syncing Audio and Video Recordings
