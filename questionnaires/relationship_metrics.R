@@ -253,11 +253,6 @@ ecr_s_av <- \(dat, ecr_dat) {
   return(dat)
 }
 
-reverse_7 <- \(x) {
-  x <- abs(x - 8)
-  return(x)
-}
-
 # Global Measure of Sexual Satisfaction (GMSEX)
 gmsex <- \(dat) {
   range <- get_range(dat, "GMSEX")
@@ -271,17 +266,51 @@ gmsex <- \(dat) {
   return(dat)
 }
 
+reverse_7 <- \(x) {
+  x <- abs(x - 8)
+  return(x)
+}
+
+
 # Female Sexual Function Index (FSFI)
 fsfi <- \(dat) {
   range <- get_range(dat, "FSFI")
-  x <- dat |> select(all_of(range))
+  x <- dat |> 
+ #   filter(Q4 == 1) |> 
+    select(all_of(range))
   
-  # Reverse code all items
-  x <- x |> mutate(across(everything(), reverse_7))
-  
+  x <- x |>
+    mutate(across(ends_with(c("15", "16", "29", "30")), reverse_5)) |>
+    mutate(across(ends_with(c(
+      "17", "18", "19", "20", "21", "23", "25", "27", "28"
+    )), reverse_6)) |>
+    mutate(across(
+      ends_with(c("22", "24", "26", "31", "32", "33")),
+      minus_one
+    ))
+
   dat <- dat |> mutate(FSFI = rowSums(x), .after = max(range))
   
   return(dat)
+}
+
+# Reverse code 1:5 --> 5:1
+reverse_5 <- \(x) {
+  x <- abs(x - 6)
+  return(x)
+}
+
+# Reverse and recode "no sex. activity" as 0
+# 1:6 --> 0, 5:1
+reverse_6 <- \(x) {
+  x <- abs(x - 7)
+  x <- case_when(
+    x == 6 ~ 0,
+    .default = x
+  )
+#  if (x == 6) x <- 0
+  # if statements do not work with vectors, use case_when() instead
+  return(x)
 }
 
 # International Index of Erectile Function (IIEF)
