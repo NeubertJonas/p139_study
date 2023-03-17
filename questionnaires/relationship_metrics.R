@@ -6,16 +6,18 @@ library(tidyverse)
 
 # Import data, filter non-participant responses, and
 # remove unnecessary columns
-drop_col <- c("StartDate", "EndDate", "Status", "IPAddress", "Progress",
-           "ResponseID","RecipientLastName", "RecipientFirstName",
-           "RecipientEmail", "ExternalReference", "LocationLatitude",
-           "LocationLongitude", "DistributionChannel", "UserLanguage")
+drop_col <- c(
+  "StartDate", "EndDate", "Status", "IPAddress", "Progress",
+  "ResponseID", "RecipientLastName", "RecipientFirstName",
+  "RecipientEmail", "ExternalReference", "LocationLatitude",
+  "LocationLongitude", "DistributionChannel", "UserLanguage"
+)
 
 
-dat <- read_csv("data/questionnaire_2.csv", show_col_types = FALSE) |> 
-  filter(grepl("139", Q2)) |> 
-  select(-any_of(drop_col)) |> 
-  mutate(across(Q3:Q49 | Q51_1 | Q52_1, as.integer)) |> 
+dat <- read_csv("data/questionnaire_2.csv", show_col_types = FALSE) |>
+  filter(grepl("139", Q2)) |>
+  select(-any_of(drop_col)) |>
+  mutate(across(Q3:Q49 | Q51_1 | Q52_1, as.integer)) |>
   mutate(across(Q2, as.character))
 
 rm(drop_col)
@@ -38,8 +40,12 @@ scales <- tribble(
 )
 
 calculate_metrics <- \(dat) {
-  dat = dat |> csi() |> swls() |> pprs() |> 
-    iri() |> ecr()
+  dat <- dat |>
+    csi() |>
+    swls() |>
+    pprs() |>
+    iri() |>
+    ecr()
   #|> ecr() |> gmsex() |> fsfi() |> iief()
   return(dat)
 }
@@ -51,14 +57,14 @@ calculate_metrics <- \(dat) {
 first_question <- \(x) {
   return(
     scales |> filter(name == x) |> pull(start)
-    )
+  )
 }
 
 # Item count for a scale
 get_count <- \(x) {
   return(
     scales |> filter(name == x) |> pull(item_count)
-    )
+  )
 }
 
 # Range of columns belonging to a scale
@@ -76,22 +82,20 @@ get_range <- \(dat, name) {
 # get_results(dat, c("13902", "P13901"), c("CSI_4", "SWLS"))
 
 get_results <- \(dat, participant = NA, column = NA) {
-  
   if (is.logical(participant) & is.logical(column)) {
     results <- dat |> select(any_of(c("Q2", scales$name)))
-    
   } else if (!is.logical(participant) & !is.logical(column)) {
-    results <- dat |> select(any_of(c("Q2", scale))) |> 
+    results <- dat |>
+      select(any_of(c("Q2", scale))) |>
       filter(Q2 == participant)
-    
   } else if (!is.logical(scale)) {
     results <- dat |> select(any_of(c("Q2", column)))
-    
   } else if (!is.logical(participant)) {
-    results <- dat |> select(any_of(c("Q2", scales$name))) |> 
+    results <- dat |>
+      select(any_of(c("Q2", scales$name))) |>
       filter(Q2 == participant)
-  } 
-  
+  }
+
   return(results)
 }
 
@@ -106,12 +110,12 @@ csi <- \(dat) {
   range <- get_range(dat, "CSI_4")
   x <- dat |> select(all_of(range))
   dat <- dat |> mutate(CSI_4 = rowSums(x) - 4, .after = max(range))
-  
+
   return(dat)
 }
 
 # Satisfaction with Life Scale (SWLS)
-swls <-  \(dat) {
+swls <- \(dat) {
   range <- get_range(dat, "SWLS")
   x <- dat |> select(all_of(range))
   dat <- dat |> mutate(SWLS = rowSums(x), .after = max(range))
@@ -120,71 +124,78 @@ swls <-  \(dat) {
 }
 
 # Perceived Partner Responsiveness Scale (PPRS)
-pprs <-  \(dat) {
+pprs <- \(dat) {
   range <- get_range(dat, "PPRS_12")
   x <- dat |> select(all_of(range))
   dat <- dat |> mutate(PPRS_12 = rowSums(x), .after = max(range))
-  
-  dat = dat |> pprs_u() |> pprs_v() 
-  
+
+  dat <- dat |>
+    pprs_u() |>
+    pprs_v()
+
   return(dat)
 }
 
 # PPRS: Understanding subscale
-pprs_u <-  \(dat) {
+pprs_u <- \(dat) {
   range <- get_range(dat, "PPRS_12_U")
   x <- dat |> select(all_of(range))
   dat <- dat |> mutate(PPRS_12_U = rowSums(x), .after = PPRS_12)
-  
+
   return(dat)
 }
 
 # PPRS: Validation subscale
-pprs_v <-  \(dat) {
+pprs_v <- \(dat) {
   range <- get_range(dat, "PPRS_12_V")
   x <- dat |> select(all_of(range))
   dat <- dat |> mutate(PPRS_12_V = rowSums(x), .after = PPRS_12)
-  
+
   return(dat)
 }
 
 # Interpersonal Reactivity Index for Couples (IRI-C)
-iri <-  \(dat) {
+iri <- \(dat) {
   range <- get_range(dat, "IRI_C")
   x <- dat |> select(all_of(range))
-  
+
   # Subtract 1 from all items for scoring
   # (to change range from 1:5 to 0:4)
   # Reverse code items 2, 6, 7, and 8
-  x <- x |> mutate(across(everything(), minus_one)) |>
+  x <- x |>
+    mutate(across(everything(), minus_one)) |>
     mutate(across(ends_with(c("_2", "_6", "_7", "_8")), reverse_iri))
-  
+
   dat <- dat |> mutate(IRI_C = rowSums(x), .after = max(range))
-  
+
   # Subscales
-  dat <- dat |> iri_ec(x) |> iri_pt(x)
-  
+  dat <- dat |>
+    iri_ec(x) |>
+    iri_pt(x)
+
   return(dat)
 }
 
 
 # IRI-C: Empathic Concern scale
-iri_ec <-  \(dat, iri_dat) {
+iri_ec <- \(dat, iri_dat) {
   x <- iri_dat |> select(
-    ends_with(c("_1", "_2", "_4", "_6", "_8", "_9", "_11")))
-  
+    ends_with(c("_1", "_2", "_4", "_6", "_8", "_9", "_11"))
+  )
+
   dat <- dat |> mutate(IRI_C_EC = rowSums(x), .after = IRI_C)
-  
+
   return(dat)
 }
 
 # IRI-C: Perspective Taking scale
-iri_pt <-  \(dat, iri_dat) {
+iri_pt <- \(dat, iri_dat) {
   x <- iri_dat |> select(
-    !ends_with(c("_1", "_2", "_4", "_6", "_8", "_9", "_11")))
-  
+    !ends_with(c("_1", "_2", "_4", "_6", "_8", "_9", "_11"))
+  )
+
   dat <- dat |> mutate(IRI_C_PT = rowSums(x), .after = IRI_C)
-  
+
   return(dat)
 }
 
@@ -194,43 +205,50 @@ reverse_iri <- \(x) {
   return(x)
 }
 
-minus_one <- \(x) {return(x - 1)}
+minus_one <- \(x) {
+  return(x - 1)
+}
 
 
 # Experiences in Close Relationship Scale (ECR-S)
-ecr <-  \(dat) {
+ecr <- \(dat) {
   range <- get_range(dat, "ECR_S")
   x <- dat |> select(all_of(range))
-  
+
   # Reverse code items 1, 5, 8, and 9
   x <- x |> mutate(across(
-    ends_with(c("_1", "_5", "_8", "_9")), ecr_reverse))
-  
+    ends_with(c("_1", "_5", "_8", "_9")), ecr_reverse
+  ))
+
   dat <- dat |> mutate(ECR_S = rowSums(x), .after = max(range))
-  
+
   # Subscales
-  dat <- dat |> ecr_s_an(x) |> ecr_s_av(x)
-  
+  dat <- dat |>
+    ecr_s_an(x) |>
+    ecr_s_av(x)
+
   return(dat)
 }
 
 # ECR-S: Attachment Anxiety scale
-ecr_s_an <-  \(dat, ecr_dat) {
+ecr_s_an <- \(dat, ecr_dat) {
   x <- ecr_dat |> select(
-    ends_with(c("_2", "_4", "_6", "_8", "_10", "_12")))
-  
+    ends_with(c("_2", "_4", "_6", "_8", "_10", "_12"))
+  )
+
   dat <- dat |> mutate(ECR_S_AN = rowSums(x), .after = ECR_S)
-  
+
   return(dat)
 }
 
 # ECR-S: Attachment Avoidance scale
-ecr_s_av <-  \(dat, ecr_dat) {
+ecr_s_av <- \(dat, ecr_dat) {
   x <- ecr_dat |> select(
-    !ends_with(c("_2", "_4", "_6", "_8", "_10", "_12")))
-  
+    !ends_with(c("_2", "_4", "_6", "_8", "_10", "_12"))
+  )
+
   dat <- dat |> mutate(ECR_S_AV = rowSums(x), .after = ECR_S)
-  
+
   return(dat)
 }
 
@@ -253,7 +271,7 @@ gmsex <- \(dat) {
 }
 
 
-output = calculate_metrics(dat)
+output <- calculate_metrics(dat)
 
 
 # TODO: Lintr, stylr, roxygen2
