@@ -26,17 +26,17 @@ rm(drop_col)
 # Overview of all questionnaires
 # Double-check if starting question and item count are correct.
 scales <- tribble(
-  ~name, ~start, ~item_count,
-  "CSI_4", "Q5", 4,
-  "SWLS", "Q9_1", 5,
-  "PPRS_12", "Q10_1", 12,
+  ~name,       ~start,  ~item_count,
+  "CSI_4",     "Q5",    4,
+  "SWLS",      "Q9_1",  5,
+  "PPRS_12",   "Q10_1", 12,
   "PPRS_12_U", "Q10_3", 5,
   "PPRS_12_V", "Q10_8", 5,
-  "IRI_C", "Q11_1", 13,
-  "ECR_S", "Q12_1", 12,
-  "GMSEX", "Q13_1", 5,
-  "FSFI", "Q15", 19,
-  "IIEF", "Q35", 15
+  "IRI_C",     "Q11_1", 13,
+  "ECR_S",     "Q12_1", 12,
+  "GMSEX",     "Q13_1", 5,
+  "FSFI",      "Q15",   19,
+  "IIEF",      "Q35",   15
 )
 
 calculate_metrics <- \(dat) {
@@ -82,9 +82,9 @@ get_range <- \(dat, name) {
 # get_results(dat, c("13902", "P13901"), c("CSI_4", "SWLS"))
 
 get_results <- \(dat, participant = NA, column = NA) {
-  if (is.logical(participant) & is.logical(column)) {
+  if (is.logical(participant) && is.logical(column)) {
     results <- dat |> select(any_of(c("Q2", scales$name)))
-  } else if (!is.logical(participant) & !is.logical(column)) {
+  } else if (!is.logical(participant) && !is.logical(column)) {
     results <- dat |>
       select(any_of(c("Q2", scale))) |>
       filter(Q2 == participant)
@@ -98,6 +98,7 @@ get_results <- \(dat, participant = NA, column = NA) {
 
   return(results)
 }
+
 
 # Questionnaire Functions -------------------------------------------------
 # Note. Scores for scales will be NA if any questions were skipped.
@@ -270,8 +271,31 @@ gmsex <- \(dat) {
   return(dat)
 }
 
+# Female Sexual Function Index (FSFI)
+fsfi <- \(dat) {
+  range <- get_range(dat, "FSFI")
+  x <- dat |> select(all_of(range))
+  
+  # Reverse code all items
+  x <- x |> mutate(across(everything(), reverse_7))
+  
+  dat <- dat |> mutate(FSFI = rowSums(x), .after = max(range))
+  
+  return(dat)
+}
+
+# International Index of Erectile Function (IIEF)
+iief <- \(dat) {
+  range <- get_range(dat, "IIEF")
+  x <- dat |> select(all_of(range))
+  
+  # Reverse code all items
+  x <- x |> mutate(across(everything(), reverse_7))
+  
+  dat <- dat |> mutate(IIEF = rowSums(x), .after = max(range))
+  
+  return(dat)
+}
+
 
 output <- calculate_metrics(dat)
-
-
-# TODO: Lintr, stylr, roxygen2
