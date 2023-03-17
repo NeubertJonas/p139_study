@@ -39,7 +39,7 @@ scales <- tribble(
 
 calculate_metrics <- \(dat) {
   dat = dat |> csi() |> swls() |> pprs() |> 
-    iri() 
+    iri() |> ecr()
   #|> ecr() |> gmsex() |> fsfi() |> iief()
   return(dat)
 }
@@ -148,25 +148,16 @@ pprs_v <-  \(dat) {
   return(dat)
 }
 
-iri_reverse <- \(x) {
-  # x <- switch(x + 1, 4, 3, 2, 1, 0)
-  x <-  abs(x - 4)
-  return(x)
-}
-
-minus_one <- \(x) {
-  return(x - 1)
-}
-
 # Interpersonal Reactivity Index for Couples (IRI-C)
 iri <-  \(dat) {
   range <- get_range(dat, "IRI_C")
   x <- dat |> select(all_of(range))
   
   # Subtract 1 from all items for scoring
+  # (to change range from 1:5 to 0:4)
   # Reverse code items 2, 6, 7, and 8
   x <- x |> mutate(across(everything(), minus_one)) |>
-    mutate(across(ends_with(c("_2", "_6", "_7", "_8")), iri_reverse))
+    mutate(across(ends_with(c("_2", "_6", "_7", "_8")), reverse_iri))
   
   dat <- dat |> mutate(IRI_C = rowSums(x), .after = max(range))
   
@@ -179,7 +170,9 @@ iri <-  \(dat) {
 
 # IRI-C: Empathic Concern scale
 iri_ec <-  \(dat, iri_dat) {
-  x <- iri_dat |> select(ends_with(c("_1", "_2", "_4", "_6", "_8", "_9", "_11")))
+  x <- iri_dat |> select(
+    ends_with(c("_1", "_2", "_4", "_6", "_8", "_9", "_11")))
+  
   dat <- dat |> mutate(IRI_C_EC = rowSums(x), .after = IRI_C)
   
   return(dat)
@@ -187,10 +180,80 @@ iri_ec <-  \(dat, iri_dat) {
 
 # IRI-C: Perspective Taking scale
 iri_pt <-  \(dat, iri_dat) {
-  x <- iri_dat |> select(!ends_with(c("_1", "_2", "_4", "_6", "_8", "_9", "_11")))
+  x <- iri_dat |> select(
+    !ends_with(c("_1", "_2", "_4", "_6", "_8", "_9", "_11")))
+  
   dat <- dat |> mutate(IRI_C_PT = rowSums(x), .after = IRI_C)
   
   return(dat)
 }
 
+# Helper Functions
+reverse_iri <- \(x) {
+  x <- abs(x - 4)
+  return(x)
+}
+
+minus_one <- \(x) {return(x - 1)}
+
+
+# Experiences in Close Relationship Scale (ECR-S)
+ecr <-  \(dat) {
+  range <- get_range(dat, "ECR_S")
+  x <- dat |> select(all_of(range))
+  
+  # Reverse code items 1, 5, 8, and 9
+  x <- x |> mutate(across(
+    ends_with(c("_1", "_5", "_8", "_9")), ecr_reverse))
+  
+  dat <- dat |> mutate(ECR_S = rowSums(x), .after = max(range))
+  
+  # Subscales
+  dat <- dat |> ecr_s_an(x) |> ecr_s_av(x)
+  
+  return(dat)
+}
+
+# ECR-S: Attachment Anxiety scale
+ecr_s_an <-  \(dat, ecr_dat) {
+  x <- ecr_dat |> select(
+    ends_with(c("_2", "_4", "_6", "_8", "_10", "_12")))
+  
+  dat <- dat |> mutate(ECR_S_AN = rowSums(x), .after = ECR_S)
+  
+  return(dat)
+}
+
+# ECR-S: Attachment Avoidance scale
+ecr_s_av <-  \(dat, ecr_dat) {
+  x <- ecr_dat |> select(
+    !ends_with(c("_2", "_4", "_6", "_8", "_10", "_12")))
+  
+  dat <- dat |> mutate(ECR_S_AV = rowSums(x), .after = ECR_S)
+  
+  return(dat)
+}
+
+reverse_7 <- \(x) {
+  x <- abs(x - 8)
+  return(x)
+}
+
+# Global Measure of Sexual Satisfaction (GMSEX)
+gmsex <- \(dat) {
+  range <- get_range(dat, "GMSEX")
+  x <- dat |> select(all_of(range))
+
+  # Reverse code all items
+  x <- x |> mutate(across(everything(), reverse_7))
+
+  dat <- dat |> mutate(GMSEX = rowSums(x), .after = max(range))
+
+  return(dat)
+}
+
+
 output = calculate_metrics(dat)
+
+
+# TODO: Lintr, stylr, roxygen2
