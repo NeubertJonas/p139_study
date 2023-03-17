@@ -278,6 +278,7 @@ fsfi <- \(dat) {
   x <- dat |> 
  #   filter(Q4 == 1) |> 
     select(all_of(range))
+
   
   x <- x |>
     mutate(across(ends_with(c("15", "16", "29", "30")), reverse_5)) |>
@@ -296,6 +297,18 @@ fsfi <- \(dat) {
   # orgasm
   # satisfaction
   # pain
+
+  
+  x <- x |>
+    mutate(across(ends_with(c("15", "16", "29", "30")), reverse_5)) |>
+    mutate(across(ends_with(c(
+      "17", "18", "19", "20", "21", "23", "25", "27", "28"
+    )), reverse_6)) |>
+    mutate(across(
+      ends_with(c("22", "24", "26", "31", "32", "33")),
+      minus_one
+    ))
+>>>>>>> af6697edb0faf791ba3f3863d42c079632609eaf
 
   dat <- dat |> mutate(FSFI = rowSums(x), .after = max(range))
   
