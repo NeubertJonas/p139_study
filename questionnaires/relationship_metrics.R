@@ -28,12 +28,21 @@ scales <- tribble(
   "CSI_4", "Q5", 4,
   "SWLS", "Q9_1", 5,
   "PPRS_12", "Q10_1", 12,
+  "PPRS_12_U", "Q10_3", 5,
+  "PPRS_12_V", "Q10_8", 5,
   "IRI_C", "Q11_1", 13,
-  "ECR-S", "Q12_1", 12,
+  "ECR_S", "Q12_1", 12,
   "GMSEX", "Q13_1", 5,
   "FSFI", "Q15", 19,
   "IIEF", "Q35", 15
 )
+
+calculate_metrics <- \(dat) {
+  dat = dat |> csi() |> swls() |> pprs() |> 
+    iri() 
+  #|> ecr() |> gmsex() |> fsfi() |> iief()
+  return(dat)
+}
 
 
 # Generic Helper Functions ------------------------------------------------
@@ -93,57 +102,95 @@ get_results <- \(dat, participant = NA, column = NA) {
 # Qualtrics records the lowest response as "1", but for scoring
 # it is changed to "0".
 
-add_csi <- \(dat) {
+csi <- \(dat) {
   range <- get_range(dat, "CSI_4")
-  csi <- dat |> select(all_of(range))
-  dat <- dat |> mutate(CSI_4 = rowSums(csi) - 4, .after = max(range))
+  x <- dat |> select(all_of(range))
+  dat <- dat |> mutate(CSI_4 = rowSums(x) - 4, .after = max(range))
+  
   return(dat)
 }
 
-dat = add_csi(dat)
-  
+# Satisfaction with Life Scale (SWLS)
+swls <-  \(dat) {
+  range <- get_range(dat, "SWLS")
+  x <- dat |> select(all_of(range))
+  dat <- dat |> mutate(SWLS = rowSums(x), .after = max(range))
 
-get_csi = \(dat) {
-  return(
-    dat |> select(Q2 | CSI_4)
-  )
+  return(dat)
+}
+
+# Perceived Partner Responsiveness Scale (PPRS)
+pprs <-  \(dat) {
+  range <- get_range(dat, "PPRS_12")
+  x <- dat |> select(all_of(range))
+  dat <- dat |> mutate(PPRS_12 = rowSums(x), .after = max(range))
+  
+  dat = dat |> pprs_u() |> pprs_v() 
+  
+  return(dat)
+}
+
+# PPRS: Understanding subscale
+pprs_u <-  \(dat) {
+  range <- get_range(dat, "PPRS_12_U")
+  x <- dat |> select(all_of(range))
+  dat <- dat |> mutate(PPRS_12_U = rowSums(x), .after = PPRS_12)
+  
+  return(dat)
+}
+
+# PPRS: Validation subscale
+pprs_v <-  \(dat) {
+  range <- get_range(dat, "PPRS_12_V")
+  x <- dat |> select(all_of(range))
+  dat <- dat |> mutate(PPRS_12_V = rowSums(x), .after = PPRS_12)
+  
+  return(dat)
+}
+
+iri_reverse <- \(x) {
+  # x <- switch(x + 1, 4, 3, 2, 1, 0)
+  x <-  abs(x - 4)
+  return(x)
+}
+
+minus_one <- \(x) {
+  return(x - 1)
+}
+
+# Interpersonal Reactivity Index for Couples (IRI-C)
+iri <-  \(dat) {
+  range <- get_range(dat, "IRI_C")
+  x <- dat |> select(all_of(range))
+  
+  # Subtract 1 from all items for scoring
+  # Reverse code items 2, 6, 7, and 8
+  x <- x |> mutate(across(everything(), minus_one)) |>
+    mutate(across(ends_with(c("_2", "_6", "_7", "_8")), iri_reverse))
+  
+  dat <- dat |> mutate(IRI_C = rowSums(x), .after = max(range))
+  
+  # Subscales
+  dat <- dat |> iri_ec(x) |> iri_pt(x)
+  
+  return(dat)
 }
 
 
-
-add_swls = \(dat) {
-  swls = dat |> mutate(SWLS = swls_cols , .after = Q9_5)
-  swls = swls |> mutate(SWLS2 = rowSums(select(swls, starts_with("Q9_"))), .after = Q9_5)
-  # Note. Score will be NA if any questions were skipped.
+# IRI-C: Empathic Concern scale
+iri_ec <-  \(dat, iri_dat) {
+  x <- iri_dat |> select(ends_with(c("_1", "_2", "_4", "_6", "_8", "_9", "_11")))
+  dat <- dat |> mutate(IRI_C_EC = rowSums(x), .after = IRI_C)
   
-  return(swls)
+  return(dat)
 }
 
-test = add_csi(dat)
-
-new = dat |> add_swls() |> add_csi()
-
-csi = dat |> select(Q5:Q8)
-csi = csi |> mutate(across(everything(), as.numeric)) |> 
-  mutate(CSI_4 = Q5 + Q6 + Q7 + Q8 - 4)
-
-
-
-
-
-  mutate(csi4 = as.numeric(Q5) + 4)
-csi$Q5 = csi$Q5 + 1
-
-csi4 = \(x) {
-  csi = dat |> select(Q5:Q8) |> lapply(as.numeric)
-    mutate(csi4 = as.numeric(Q5) + 4)
-      
-  csi = 
+# IRI-C: Perspective Taking scale
+iri_pt <-  \(dat, iri_dat) {
+  x <- iri_dat |> select(!ends_with(c("_1", "_2", "_4", "_6", "_8", "_9", "_11")))
+  dat <- dat |> mutate(IRI_C_PT = rowSums(x), .after = IRI_C)
   
-  
-  return(result)
+  return(dat)
 }
 
-n(result)
-}
-
+output = calculate_metrics(dat)
