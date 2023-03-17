@@ -278,7 +278,6 @@ fsfi <- \(dat) {
   x <- dat |> 
  #   filter(Q4 == 1) |> 
     select(all_of(range))
-
   
   x <- x |>
     mutate(across(ends_with(c("15", "16", "29", "30")), reverse_5)) |>
