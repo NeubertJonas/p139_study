@@ -45,8 +45,10 @@ calculate_metrics <- \(dat) {
     swls() |>
     pprs() |>
     iri() |>
-    ecr()
-  #|> ecr() |> gmsex() |> fsfi() |> iief()
+    ecr() |>
+    gmsex() |>
+    fsfi() 
+  #|> iief()
   return(dat)
 }
 
@@ -55,24 +57,20 @@ calculate_metrics <- \(dat) {
 
 # Column name of first question for a scale
 first_question <- \(x) {
-  return(
-    scales |> filter(name == x) |> pull(start)
-  )
+  scales |> filter(name == x) |> pull(start)
 }
+
 
 # Item count for a scale
 get_count <- \(x) {
-  return(
-    scales |> filter(name == x) |> pull(item_count)
-  )
+  scales |> filter(name == x) |> pull(item_count)
 }
 
 # Range of columns belonging to a scale
 get_range <- \(dat, name) {
   x <- which(names(dat) == first_question(name))
   y <- x + get_count(name) - 1
-  z <- c(x:y)
-  return(z)
+  c(x:y)
 }
 
 # Results for Scales
@@ -207,8 +205,10 @@ reverse_iri <- \(x) {
 }
 
 minus_one <- \(x) {
-  return(x - 1)
+  x - 1
+  #  return(x - 1)
 }
+
 
 
 # Experiences in Close Relationship Scale (ECR-S)
@@ -218,7 +218,8 @@ ecr <- \(dat) {
 
   # Reverse code items 1, 5, 8, and 9
   x <- x |> mutate(across(
-    ends_with(c("_1", "_5", "_8", "_9")), ecr_reverse
+    ends_with(c("_1", "_5", "_8", "_9")), 
+    ~ abs(. - 8)
   ))
 
   dat <- dat |> mutate(ECR_S = rowSums(x), .after = max(range))
@@ -275,20 +276,40 @@ reverse_7 <- \(x) {
 # Female Sexual Function Index (FSFI)
 fsfi <- \(dat) {
   range <- get_range(dat, "FSFI")
-  x <- dat |> 
- #   filter(Q4 == 1) |> 
+  x <- dat |>
+    #   filter(Q4 == 1) |>
     select(all_of(range))
+
+  # x <- x |>
+  #   mutate(
+  #     across(ends_with(c("15", "16", "29", "30")), reverse_5)) |>
+  #   mutate(
+  #     across(ends_with(c(
+  #     "17", "18", "19", "20", "21", "23", "25", "27", "28")), reverse_6)) |>
+  #   mutate(
+  #     across(ends_with(c("22", "24", "26", "31", "32", "33")), minus_one
+  #   ))
+
   
   x <- x |>
-    mutate(
-      across(ends_with(c("15", "16", "29", "30")), reverse_5)) |>
-    mutate(
-      across(ends_with(c(
-      "17", "18", "19", "20", "21", "23", "25", "27", "28")), reverse_6)) |>
-    mutate(
-      across(ends_with(c("22", "24", "26", "31", "32", "33")), minus_one
+    mutate(across(
+      ends_with(c("15", "16", "29", "30")),
+      ~ abs(. - 6)
+    )) |>
+    mutate(across(
+      ends_with(c(
+        "17", "18", "19", "20", "21", "23", "25", "27", "28"
+      )),
+      \(.) case_when(
+        . == 1 ~ 0,
+        .default = abs(. - 7)
+      )
+    )) |>
+    mutate(across(
+      ends_with(c("22", "24", "26", "31", "32", "33")),
+      ~ . - 1
     ))
-  
+
   # Calculate domains (subscales):
   # Desire, Arousal, Lubrication, Orgasm, Satisfaction, Pain
   x <- x |>
@@ -298,10 +319,10 @@ fsfi <- \(dat) {
     mutate(FSFI_O = (x[[11]] + x[[12]] + x[[13]]) * 0.4) |>
     mutate(FSFI_S = (x[[14]] + x[[15]] + x[[16]]) * 0.4) |>
     mutate(FSFI_P = (x[[17]] + x[[18]] + x[[19]]) * 0.4)
- # x <- mutate(x, FSFI2 = rowSums(x[20:25]), .after = 19)
-  x <- x |> mutate(FSFI = rowSums(pick(20:25)), .after = 19)
+
+  x <- x |> mutate(x, FSFI = rowSums(pick(20:25)), .after = 19)
   fsfi <- x |> select(contains("FSFI"))
-  
+
   dat <- dat |> add_column(fsfi, .after = "Q33")
 
   return(dat)
@@ -310,6 +331,8 @@ fsfi <- \(dat) {
 
 
 # Reverse code 1:5 --> 5:1
+reverse_5 <- as_mapper(~ abs(. - 6))
+
 reverse_5 <- \(x) {
   x <- abs(x - 6)
   return(x)
@@ -325,21 +348,33 @@ reverse_6 <- \(x) {
     x == 6 ~ 0,
     .default = x
   )
-#  if (x == 6) x <- 0
+
+
+  #  if (x == 6) x <- 0
   # if statements do not work with vectors, use case_when() instead
   return(x)
+}
+
+reverse_6 <- \(x) {
+  case_when(
+    x == 1 ~ 0,
+    #   x > 1 ~ abs(x - 7),
+    .default = abs(x - 7)
+  )
+
+  #  return(x)
 }
 
 # International Index of Erectile Function (IIEF)
 iief <- \(dat) {
   range <- get_range(dat, "IIEF")
   x <- dat |> select(all_of(range))
-  
+
   # Reverse code all items
   x <- x |> mutate(across(everything(), reverse_7))
-  
+
   dat <- dat |> mutate(IIEF = rowSums(x), .after = max(range))
-  
+
   return(dat)
 }
 
