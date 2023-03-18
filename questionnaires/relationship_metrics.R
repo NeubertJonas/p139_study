@@ -280,45 +280,42 @@ fsfi <- \(dat) {
     select(all_of(range))
   
   x <- x |>
-    mutate(across(ends_with(c("15", "16", "29", "30")), reverse_5)) |>
-    mutate(across(ends_with(c(
-      "17", "18", "19", "20", "21", "23", "25", "27", "28"
-    )), reverse_6)) |>
-    mutate(across(
-      ends_with(c("22", "24", "26", "31", "32", "33")),
-      minus_one
+    mutate(
+      across(ends_with(c("15", "16", "29", "30")), reverse_5)) |>
+    mutate(
+      across(ends_with(c(
+      "17", "18", "19", "20", "21", "23", "25", "27", "28")), reverse_6)) |>
+    mutate(
+      across(ends_with(c("22", "24", "26", "31", "32", "33")), minus_one
     ))
   
-  # Calculate domains (subscales)
-  # desire
-  # arousal
-  # lubrication
-  # orgasm
-  # satisfaction
-  # pain
-
-  
+  # Calculate domains (subscales):
+  # Desire, Arousal, Lubrication, Orgasm, Satisfaction, Pain
   x <- x |>
-    mutate(across(ends_with(c("15", "16", "29", "30")), reverse_5)) |>
-    mutate(across(ends_with(c(
-      "17", "18", "19", "20", "21", "23", "25", "27", "28"
-    )), reverse_6)) |>
-    mutate(across(
-      ends_with(c("22", "24", "26", "31", "32", "33")),
-      minus_one
-    ))
->>>>>>> af6697edb0faf791ba3f3863d42c079632609eaf
-
-  dat <- dat |> mutate(FSFI = rowSums(x), .after = max(range))
+    mutate(FSFI_D = (x[[1]] + x[[2]]) * 0.6) |>
+    mutate(FSFI_A = (x[[3]] + x[[4]] + x[[5]] + x[[6]]) * 0.3) |>
+    mutate(FSFI_L = (x[[7]] + x[[8]] + x[[9]] + x[[10]]) * 0.3) |>
+    mutate(FSFI_O = (x[[11]] + x[[12]] + x[[13]]) * 0.4) |>
+    mutate(FSFI_S = (x[[14]] + x[[15]] + x[[16]]) * 0.4) |>
+    mutate(FSFI_P = (x[[17]] + x[[18]] + x[[19]]) * 0.4)
+ # x <- mutate(x, FSFI2 = rowSums(x[20:25]), .after = 19)
+  x <- x |> mutate(FSFI = rowSums(pick(20:25)), .after = 19)
+  fsfi <- x |> select(contains("FSFI"))
   
+  dat <- dat |> add_column(fsfi, .after = "Q33")
+
   return(dat)
 }
+
+
 
 # Reverse code 1:5 --> 5:1
 reverse_5 <- \(x) {
   x <- abs(x - 6)
   return(x)
 }
+
+# reverse_5 <- \(x) {abs(x - 6)}
 
 # Reverse and recode "no sex. activity" as 0
 # 1:6 --> 0, 5:1
