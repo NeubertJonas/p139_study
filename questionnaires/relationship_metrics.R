@@ -199,17 +199,9 @@ iri_pt <- \(dat, iri_dat) {
 }
 
 # Helper Functions
-reverse_iri <- \(x) {
-  x <- abs(x - 4)
-  return(x)
-}
+reverse_iri <- \(x) abs(x - 4)
 
-minus_one <- \(x) {
-  x - 1
-  #  return(x - 1)
-}
-
-
+minus_one <- \(x) x - 1
 
 # Experiences in Close Relationship Scale (ECR-S)
 ecr <- \(dat) {
@@ -267,10 +259,7 @@ gmsex <- \(dat) {
   return(dat)
 }
 
-reverse_7 <- \(x) {
-  x <- abs(x - 8)
-  return(x)
-}
+reverse_7 <- \(x) abs(x - 8)
 
 
 # Female Sexual Function Index (FSFI)
@@ -280,17 +269,7 @@ fsfi <- \(dat) {
     #   filter(Q4 == 1) |>
     select(all_of(range))
 
-  # x <- x |>
-  #   mutate(
-  #     across(ends_with(c("15", "16", "29", "30")), reverse_5)) |>
-  #   mutate(
-  #     across(ends_with(c(
-  #     "17", "18", "19", "20", "21", "23", "25", "27", "28")), reverse_6)) |>
-  #   mutate(
-  #     across(ends_with(c("22", "24", "26", "31", "32", "33")), minus_one
-  #   ))
 
-  
   x <- x |>
     mutate(across(
       ends_with(c("15", "16", "29", "30")),
@@ -331,38 +310,18 @@ fsfi <- \(dat) {
 
 
 # Reverse code 1:5 --> 5:1
-reverse_5 <- as_mapper(~ abs(. - 6))
-
-reverse_5 <- \(x) {
-  x <- abs(x - 6)
-  return(x)
-}
+reverse_5 <- \(x) abs(x - 6)
 
 # reverse_5 <- \(x) {abs(x - 6)}
 
 # Reverse and recode "no sex. activity" as 0
 # 1:6 --> 0, 5:1
 reverse_6 <- \(x) {
-  x <- abs(x - 7)
-  x <- case_when(
-    x == 6 ~ 0,
-    .default = x
-  )
-
-
-  #  if (x == 6) x <- 0
-  # if statements do not work with vectors, use case_when() instead
-  return(x)
-}
-
-reverse_6 <- \(x) {
   case_when(
     x == 1 ~ 0,
     #   x > 1 ~ abs(x - 7),
     .default = abs(x - 7)
   )
-
-  #  return(x)
 }
 
 # International Index of Erectile Function (IIEF)
