@@ -1,32 +1,58 @@
-# Relationship Metrics ----------------------------------------------------
-# Calculate the scores for all relationship-related questionnaires
+# RELATIONSHIP METRICS ----------------------------------------------------
+# 
+# Calculate scores for standardized questionnaires
+# recorded via Qualtrics.
+#
+# Questionnaires: CSI-4, SWLS, PPRS-12, IRI-C, ECR-S, GMSEX, FSFI, IIEF
+#
+# Load Packages -----------------------------------------------------------
 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+library(conflicted)
 library(tidyverse)
 
-# Import data, filter non-participant responses, and
-# remove unnecessary columns
-drop_col <- c(
-  "StartDate", "EndDate", "Status", "IPAddress", "Progress",
-  "ResponseID", "RecipientLastName", "RecipientFirstName",
-  "RecipientEmail", "ExternalReference", "LocationLatitude",
-  "LocationLongitude", "DistributionChannel", "UserLanguage"
+conflicts_prefer(
+  dplyr::filter,
+  dplyr::lag)
+
+
+# Data Sources -------------------------------------------------------------
+# 
+# Download the data as comma separated values (csv) file from Qualtrics.
+# Select "Download all fields" and "Use numeric values" as options.
+# Define files and their location below:
+
+sources = c(
+  baseline = "data/questionnaire_1.csv",
+  follow_up = "data/questionnaire_2.csv"
 )
 
+# Locating Data ------------------------------------------------------------
+#
+# The table below helps R to navigate the csv file by defining the content
+# of all questions. Check if everything is correct before continuing!
+# You do this in Qualtrics or by opening the csv file in Excel.
+# For example, is "ID" saved in "Q2"? Does the IRI-C start with "Q11_1"?
+# 
+# item_count defines the number of items(columns) belonging to a questionnaire
+# You probably won't need to change this.
+#
+# Background: Numbering of questions might not be consistent across Qualtrics
+# questionnaires, because the order or composition of questions is different.
+# For example, the first item of the CSI-4 might change from
+# "Q5" to "Q6" if another question is added before.
+# Defining all starting questions here (rather than in the middle of the code),
+# makes the script more robust and easier to adapt.
 
-dat <- read_csv("data/questionnaire_2.csv", show_col_types = FALSE) |>
-  filter(grepl("139", Q2)) |>
-  select(-any_of(drop_col)) |>
-  mutate(across(Q3:Q49 | Q51_1 | Q52_1, as.integer)) |>
-  mutate(across(Q2, as.character))
+locations <- vector(mode = "list", length = 0)
 
-rm(drop_col)
-
-
-# Overview of all questionnaires
-# Double-check if starting question and item count are correct.
-scales <- tribble(
+# Just placeholder, not the final column names.
+locations[["baseline"]] <- tribble(
   ~name,       ~start,  ~item_count,
+  "ID",        "Q2",    1,
+  "Day",       "Q3",    1,
+  "Gender",    "Q4",    1,
   "CSI_4",     "Q5",    4,
   "SWLS",      "Q9_1",  5,
   "PPRS_12",   "Q10_1", 12,
@@ -36,8 +62,71 @@ scales <- tribble(
   "ECR_S",     "Q12_1", 12,
   "GMSEX",     "Q13_1", 5,
   "FSFI",      "Q15",   19,
-  "IIEF",      "Q35",   15
+  "IIEF",      "Q35",   15,
+  "Other",     "Q50",   4
 )
+
+locations[["follow_up"]] <- tribble(
+  ~name,       ~start,  ~item_count,
+  "ID",        "Q2",    1,
+  "Day",       "Q3",    1,
+  "Gender",    "Q4",    1,
+  "CSI_4",     "Q5",    4,
+  "SWLS",      "Q9_1",  5,
+  "PPRS_12",   "Q10_1", 12,
+  "PPRS_12_U", "Q10_3", 5,
+  "PPRS_12_V", "Q10_8", 5,
+  "IRI_C",     "Q11_1", 13,
+  "ECR_S",     "Q12_1", 12,
+  "GMSEX",     "Q13_1", 5,
+  "FSFI",      "Q15",   19,
+  "IIEF",      "Q35",   15,
+  "Other",     "Q50",   4
+)
+
+
+# Import Data -------------------------------------------------------------
+#
+# Import data, filter non-participant responses, and
+# remove unnecessary columns
+
+import_data <- \() {
+  drop_col <- c(
+    "StartDate", "EndDate", "Status", "IPAddress", "Progress",
+    "ResponseId", "RecipientLastName", "RecipientFirstName",
+    "RecipientEmail", "ExternalReference", "LocationLatitude",
+    "LocationLongitude", "DistributionChannel", "UserLanguage"
+  )
+  
+  for (i in seq_along(sources)) {
+    assign("ds", names(sources[i]), pos = 1)
+    col_names <- names(read_csv(sources[1],
+                                n_max = 0,
+                                show_col_types = FALSE))
+    
+    dat <- read_csv(sources[i],
+                    skip = 3,
+                    col_names = col_names,
+                    show_col_types = FALSE) |>
+      select(-any_of(drop_col)) |>
+      rename(ID = column("ID")) |>
+      filter(grepl("139", ID)) |>
+      mutate(ID = if_else(str_starts(ID, "139"),
+                                     paste0("P", ID), ID))
+    
+    assign(names(sources[i]), dat, pos = 1)
+    rm(ds, pos = 1)
+    
+  }
+}
+
+column <- \(x) {
+  x = locations[[ds]] |> filter(name == x) |> pull(start)
+}
+
+
+
+
 
 calculate_metrics <- \(dat) {
   dat <- dat |>
@@ -52,13 +141,17 @@ calculate_metrics <- \(dat) {
   return(dat)
 }
 
-
 # Generic Helper Functions ------------------------------------------------
 
 # Column name of first question for a scale
 first_question <- \(x) {
   scales |> filter(name == x) |> pull(start)
 }
+
+column <- \(legend, x) {
+  legend |> filter(name == x) |> pull(start)
+}
+
 
 
 # Item count for a scale
@@ -72,6 +165,13 @@ get_range <- \(dat, name) {
   y <- x + get_count(name) - 1
   c(x:y)
 }
+
+get_range <- \(dat, name) {
+  x <- which(names(dat) == first_question(name))
+  y <- x + get_count(name) - 1
+  c(x:y)
+}
+
 
 # Results for Scales
 # Leaving "participant" and "column" blank will return data for
@@ -299,7 +399,7 @@ fsfi <- \(dat) {
     mutate(FSFI_S = (x[[14]] + x[[15]] + x[[16]]) * 0.4) |>
     mutate(FSFI_P = (x[[17]] + x[[18]] + x[[19]]) * 0.4)
 
-  x <- x |> mutate(x, FSFI = rowSums(pick(20:25)), .after = 19)
+  x <- x |> mutate(FSFI = rowSums(pick(20:25)), .after = 19)
   fsfi <- x |> select(contains("FSFI"))
 
   dat <- dat |> add_column(fsfi, .after = "Q33")
