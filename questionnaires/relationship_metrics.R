@@ -319,9 +319,7 @@ ecr_s_an <- \(dat, ecr_dat) {
     ends_with(c("_2", "_4", "_6", "_8", "_10", "_12"))
   )
 
-  dat <- dat |> mutate(ECR_S_AN = rowSums(x), .after = ECR_S)
-
-  return(dat)
+  dat |> mutate(ECR_S_AN = rowSums(x), .after = ECR_S)
 }
 
 # ECR-S: Attachment Avoidance scale
@@ -329,10 +327,8 @@ ecr_s_av <- \(dat, ecr_dat) {
   x <- ecr_dat |> select(
     !ends_with(c("_2", "_4", "_6", "_8", "_10", "_12"))
   )
-
-  dat <- dat |> mutate(ECR_S_AV = rowSums(x), .after = ECR_S)
-
-  return(dat)
+  
+  dat |> mutate(ECR_S_AV = rowSums(x), .after = ECR_S)
 }
 
 # Global Measure of Sexual Satisfaction (GMSEX)
@@ -343,9 +339,7 @@ gmsex <- \(dat) {
   # Reverse code all items
   x <- x |> mutate(across(everything(), ~ abs(. - 8)))
 
-  dat <- dat |> mutate(GMSEX = rowSums(x), .after = max(range))
-
-  return(dat)
+  dat |> mutate(GMSEX = rowSums(x), .after = max(range))
 }
 
 # Female Sexual Function Index (FSFI)
@@ -392,9 +386,7 @@ fsfi <- \(dat) {
   x <- x |> mutate(FSFI = rowSums(pick(20:25)), .after = 19)
   fsfi <- x |> select(contains("FSFI"))
 
-  dat <- dat |> add_column(fsfi, .after = "Q33")
-
-  return(dat)
+  dat |> add_column(fsfi, .after = max(range))
 }
 
 
