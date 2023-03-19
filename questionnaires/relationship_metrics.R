@@ -256,41 +256,29 @@ iri <- \(dat) {
   x <- x |>
     mutate(across(everything(), ~ . - 1)) |>
     mutate(across(ends_with(c("_2", "_6", "_7", "_8")), ~ abs(. - 4)))
-
-  dat <- dat |> mutate(IRI_C = rowSums(x), .after = max(range))
-
-  # Subscales
-  dat <- dat |>
-    iri_ec(x) |>
-    iri_pt(x)
-
-  return(dat)
-}
-
-
-# IRI-C: Empathic Concern scale
-iri_ec <- \(dat, iri_dat) {
-  x <- iri_dat |> select(
+  
+  # IRI-C: Empathic Concern scale
+  iri_ec <- x |> select(
     ends_with(c("_1", "_2", "_4", "_6", "_8", "_9", "_11"))
   )
-
-  dat <- dat |> mutate(IRI_C_EC = rowSums(x), .after = IRI_C)
-
-  return(dat)
-}
-
-# IRI-C: Perspective Taking scale
-iri_pt <- \(dat, iri_dat) {
-  x <- iri_dat |> select(
+  
+  # IRI-C: Perspective Taking scale
+  iri_pt <- x |> select(
     !ends_with(c("_1", "_2", "_4", "_6", "_8", "_9", "_11"))
   )
 
-  dat <- dat |> mutate(IRI_C_PT = rowSums(x), .after = IRI_C)
+  dat <- dat |> 
+    mutate(IRI_C = rowSums(x), .after = max(range)) |> 
+    mutate(IRI_C_EC = rowSums(iri_ec), .after = IRI_C) |> 
+    mutate(IRI_C_PT = rowSums(iri_pt), .after = IRI_C)
+
+  # # Subscales
+  # dat <- dat |>
+  #   iri_ec(x) |>
+  #   iri_pt(x)
 
   return(dat)
 }
-
-
 
 # Experiences in Close Relationship Scale (ECR-S)
 ecr <- \(dat) {
