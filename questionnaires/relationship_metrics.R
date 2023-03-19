@@ -272,11 +272,6 @@ iri <- \(dat) {
     mutate(IRI_C_EC = rowSums(iri_ec), .after = IRI_C) |> 
     mutate(IRI_C_PT = rowSums(iri_pt), .after = IRI_C)
 
-  # # Subscales
-  # dat <- dat |>
-  #   iri_ec(x) |>
-  #   iri_pt(x)
-
   return(dat)
 }
 
@@ -290,13 +285,23 @@ ecr <- \(dat) {
     ends_with(c("_1", "_5", "_8", "_9")),
     ~ abs(. - 8)
   ))
+  
+  ecr_an <- x |> select(
+    ends_with(c("_2", "_4", "_6", "_8", "_10", "_12"))
+  )
 
-  dat <- dat |> mutate(ECR_S = rowSums(x), .after = max(range))
+  ecr_av <- x |> select(
+    !ends_with(c("_2", "_4", "_6", "_8", "_10", "_12"))
+  )
 
-  # Subscales
-  dat <- dat |>
-    ecr_s_an(x) |>
-    ecr_s_av(x)
+  dat <- dat |> mutate(ECR_S = rowSums(x), .after = max(range)) |> 
+    mutate(ECR_S_AN = rowSums(ecr_an), .after = ECR_S) |> 
+    mutate(ECR_S_AV = rowSums(ecr_av), .after = ECR_S)
+
+  # # Subscales
+  # dat <- dat |>
+  #   ecr_s_an(x) |>
+  #   ecr_s_av(x)
 
   return(dat)
 }
