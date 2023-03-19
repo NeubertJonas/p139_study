@@ -1,5 +1,5 @@
 # RELATIONSHIP METRICS ----------------------------------------------------
-# 
+#
 # Calculate scores for standardized questionnaires
 # recorded via Qualtrics.
 #
@@ -14,16 +14,17 @@ library(tidyverse)
 
 conflicts_prefer(
   dplyr::filter,
-  dplyr::lag)
+  dplyr::lag
+)
 
 
 # Data Sources -------------------------------------------------------------
-# 
+#
 # Download the data as comma separated values (csv) file from Qualtrics.
 # Select "Download all fields" and "Use numeric values" as options.
 # Define files and their location below:
 
-sources = c(
+sources <- c(
   baseline = "data/questionnaire_1.csv",
   follow_up = "data/questionnaire_2.csv"
 )
@@ -34,7 +35,7 @@ sources = c(
 # of all questions. Check if everything is correct before continuing!
 # You do this in Qualtrics or by opening the csv file in Excel.
 # For example, is "ID" saved in "Q2"? Does the IRI-C start with "Q11_1"?
-# 
+#
 # item_count defines the number of items(columns) belonging to a questionnaire
 # You probably won't need to change this.
 #
@@ -101,73 +102,65 @@ import_data <- \() {
   for (i in seq_along(sources)) {
     assign("ds", names(sources[i]), pos = 1)
     col_names <- names(read_csv(sources[1],
-                                n_max = 0,
-                                show_col_types = FALSE))
-    
+      n_max = 0,
+      show_col_types = FALSE
+    ))
+
     dat <- read_csv(sources[i],
-                    skip = 3,
-                    col_names = col_names,
-                    show_col_types = FALSE) |>
+      skip = 3,
+      col_names = col_names,
+      show_col_types = FALSE
+    ) |>
       select(-any_of(drop_col)) |>
       rename(ID = column("ID")) |>
+      rename(Day = column("Day")) |>
       filter(grepl("139", ID)) |>
       mutate(ID = if_else(str_starts(ID, "139"),
-                                     paste0("P", ID), ID))
-    
+        paste0("P", ID), ID
+      ))
+
     assign(names(sources[i]), dat, pos = 1)
     rm(ds, pos = 1)
-    
   }
 }
 
-column <- \(x) {
-  x = locations[[ds]] |> filter(name == x) |> pull(start)
+
+calculate_metrics <- \() {
+  for (i in seq_along(sources)) {
+    assign("ds", names(sources[i]), pos = 1)
+    dat <- get(ds) |>
+      csi() |>
+      swls() |>
+      pprs() |>
+      iri() |>
+      ecr() |>
+      gmsex() |>
+      fsfi()
+    #|> iief()
+    assign(names(sources[i]), dat, pos = 1)
+  }
 }
 
-
-
-
-
-calculate_metrics <- \(dat) {
-  dat <- dat |>
-    csi() |>
-    swls() |>
-    pprs() |>
-    iri() |>
-    ecr() |>
-    gmsex() |>
-    fsfi() 
-  #|> iief()
-  return(dat)
-}
 
 # Generic Helper Functions ------------------------------------------------
 
-# Column name of first question for a scale
-first_question <- \(x) {
-  scales |> filter(name == x) |> pull(start)
+# Column name of first item/question
+column <- \(x) {
+  locations[[ds]] |>
+    filter(name == x) |>
+    pull(start)
 }
-
-column <- \(legend, x) {
-  legend |> filter(name == x) |> pull(start)
-}
-
-
 
 # Item count for a scale
 get_count <- \(x) {
-  scales |> filter(name == x) |> pull(item_count)
+  locations[[ds]] |>
+    filter(name == x) |>
+    pull(item_count)
 }
 
 # Range of columns belonging to a scale
 get_range <- \(dat, name) {
-  x <- which(names(dat) == first_question(name))
-  y <- x + get_count(name) - 1
-  c(x:y)
-}
-
-get_range <- \(dat, name) {
-  x <- which(names(dat) == first_question(name))
+  x <- which(names(dat) == column(name))
   y <- x + get_count(name) - 1
   c(x:y)
 }
@@ -177,21 +170,20 @@ get_range <- \(dat, name) {
 # Leaving "participant" and "column" blank will return data for
 # all participants and all scales
 # Vectors are allowed as input, e.g.,
-# get_results(dat, c("13902", "P13901"), c("CSI_4", "SWLS"))
-
+# get_results(dat, c("P13902", "P13901"), c("CSI_4", "SWLS"))
 get_results <- \(dat, participant = NA, column = NA) {
   if (is.logical(participant) && is.logical(column)) {
-    results <- dat |> select(any_of(c("Q2", scales$name)))
+    results <- dat |> select(any_of(c(locations[[1]]$name)))
   } else if (!is.logical(participant) && !is.logical(column)) {
     results <- dat |>
-      select(any_of(c("Q2", scale))) |>
-      filter(Q2 == participant)
-  } else if (!is.logical(scale)) {
-    results <- dat |> select(any_of(c("Q2", column)))
+      select(any_of(c("ID", column))) |>
+      filter(ID == participant)
+  } else if (!is.logical(column)) {
+    results <- dat |> select(any_of(c("ID", column)))
   } else if (!is.logical(participant)) {
     results <- dat |>
-      select(any_of(c("Q2", scales$name))) |>
-      filter(Q2 == participant)
+      select(any_of(c(locations[[1]]$name))) |>
+      filter(ID == participant)
   }
 
   return(results)
@@ -310,7 +302,7 @@ ecr <- \(dat) {
 
   # Reverse code items 1, 5, 8, and 9
   x <- x |> mutate(across(
-    ends_with(c("_1", "_5", "_8", "_9")), 
+    ends_with(c("_1", "_5", "_8", "_9")),
     ~ abs(. - 8)
   ))
 
@@ -438,4 +430,3 @@ iief <- \(dat) {
 }
 
 
-output <- calculate_metrics(dat)
