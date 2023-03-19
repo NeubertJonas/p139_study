@@ -120,8 +120,9 @@ import_data <- \() {
       ))
 
     assign(names(sources[i]), dat, pos = 1)
-    rm(ds, pos = 1)
+    
   }
+  rm(ds, pos = 1)
 }
 
 
@@ -139,6 +140,7 @@ calculate_metrics <- \() {
     #|> iief()
     assign(names(sources[i]), dat, pos = 1)
   }
+  rm(ds, pos = 1)
 }
 
 
@@ -227,6 +229,7 @@ pprs <- \(dat) {
   return(dat)
 }
 
+# TODO: Integrate into pprs()
 # PPRS: Understanding subscale
 pprs_u <- \(dat) {
   range <- get_range(dat, "PPRS_12_U")
@@ -236,6 +239,7 @@ pprs_u <- \(dat) {
   return(dat)
 }
 
+# TODO: Integrate into pprs()
 # PPRS: Validation subscale
 pprs_v <- \(dat) {
   range <- get_range(dat, "PPRS_12_V")
@@ -344,14 +348,14 @@ fsfi <- \(dat) {
     ))
 
   # Calculate domains (subscales):
-  # Desire, Arousal, Lubrication, Orgasm, Satisfaction, Pain
+  # Desire[D], Arousal[A], Lubrication[L], Orgasm[O], Satisfaction[S], Pain[P]
   x <- x |>
     mutate(FSFI_D = (x[[1]] + x[[2]]) * 0.6) |>
-    mutate(FSFI_A = (x[[3]] + x[[4]] + x[[5]] + x[[6]]) * 0.3) |>
-    mutate(FSFI_L = (x[[7]] + x[[8]] + x[[9]] + x[[10]]) * 0.3) |>
-    mutate(FSFI_O = (x[[11]] + x[[12]] + x[[13]]) * 0.4) |>
-    mutate(FSFI_S = (x[[14]] + x[[15]] + x[[16]]) * 0.4) |>
-    mutate(FSFI_P = (x[[17]] + x[[18]] + x[[19]]) * 0.4)
+    mutate(FSFI_A = rowSums(x[3:6]) * 0.3) |>
+    mutate(FSFI_L = rowSums(x[7:10]) * 0.3) |>
+    mutate(FSFI_O = rowSums(x[11:13]) * 0.4) |>
+    mutate(FSFI_S = rowSums(x[14:16]) * 0.4) |>
+    mutate(FSFI_P = rowSums(x[17:19]) * 0.4)
 
   x <- x |> mutate(FSFI = rowSums(pick(20:25)), .after = 19)
   fsfi <- x |> select(contains("FSFI"))
@@ -363,14 +367,48 @@ fsfi <- \(dat) {
 # International Index of Erectile Function (IIEF)
 iief <- \(dat) {
   range <- get_range(dat, "IIEF")
-  x <- dat |> select(all_of(range))
-
-  # Reverse code all items
-  x <- x |> mutate(across(everything(), reverse_7))
-
-  dat <- dat |> mutate(IIEF = rowSums(x), .after = max(range))
-
-  return(dat)
+  x <- dat |>
+    #   filter(Q4 == 1) |>
+    select(all_of(range))
+  
+  
+  x <- x |>
+    mutate(across(
+      ends_with(c("15", "16", "29", "30")),
+      # Reverse code 1:5 --> 5:1
+      ~ abs(. - 6)
+    )) |>
+    mutate(across(
+      ends_with(c(
+        "17", "18", "19", "20", "21", "23", "25", "27", "28"
+      )),
+      # Reverse and recode "no sex. activity" as 0
+      # 1:6 --> 0, 5:1
+      \(.) case_when(
+        . == 1 ~ 0,
+        .default = abs(. - 7)
+      )
+    )) |>
+    mutate(across(
+      ends_with(c("22", "24", "26", "31", "32", "33")),
+      # Minus one
+      ~ . - 1
+    ))
+  
+  # Calculate domains (subscales):
+  # Erectile Function[E], Orgasmic Function[OF], Sexual Desire[S],
+  # Intercourse Satisfaction[I], Overall Satisfaction[OS]
+  x <- x |>
+    mutate(IIEF_E  = x[[1]] + x[[2]] + x[[3]] + x[[4]] + x[[5]] + x[[15]]) |>
+    mutate(IIEF_OF = x[[9]] + x[[10]]) |>
+    mutate(IIEF_S  = x[[11]] + x[[12]]) |>
+    mutate(IIEF_I  = x[[6]] + x[[7]] + x[[8]]) |>
+    mutate(IIEF_OS = x[[13]] + x[[14]])
+  
+  x <- x |> mutate(IIEF = rowSums(pick(20:25)), .after = 19)
+  fsfi <- x |> select(contains("IIEF"))
+  
+  dat |> add_column(iief, .after = max(range))
 }
 
 
