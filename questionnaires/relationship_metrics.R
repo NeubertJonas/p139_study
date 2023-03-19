@@ -298,30 +298,7 @@ ecr <- \(dat) {
     mutate(ECR_S_AN = rowSums(ecr_an), .after = ECR_S) |> 
     mutate(ECR_S_AV = rowSums(ecr_av), .after = ECR_S)
 
-  # # Subscales
-  # dat <- dat |>
-  #   ecr_s_an(x) |>
-  #   ecr_s_av(x)
-
   return(dat)
-}
-
-# ECR-S: Attachment Anxiety scale
-ecr_s_an <- \(dat, ecr_dat) {
-  x <- ecr_dat |> select(
-    ends_with(c("_2", "_4", "_6", "_8", "_10", "_12"))
-  )
-
-  dat |> mutate(ECR_S_AN = rowSums(x), .after = ECR_S)
-}
-
-# ECR-S: Attachment Avoidance scale
-ecr_s_av <- \(dat, ecr_dat) {
-  x <- ecr_dat |> select(
-    !ends_with(c("_2", "_4", "_6", "_8", "_10", "_12"))
-  )
-  
-  dat |> mutate(ECR_S_AV = rowSums(x), .after = ECR_S)
 }
 
 # Global Measure of Sexual Satisfaction (GMSEX)
