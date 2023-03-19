@@ -136,8 +136,8 @@ calculate_metrics <- \() {
       iri() |>
       ecr() |>
       gmsex() |>
-      fsfi()
-    #|> iief()
+      fsfi() |> 
+      iief()
     assign(names(sources[i]), dat, pos = 1)
   }
   rm(ds, pos = 1)
@@ -374,13 +374,13 @@ iief <- \(dat) {
   
   x <- x |>
     mutate(across(
-      ends_with(c("15", "16", "29", "30")),
+      ends_with(c("45", "46", "47", "48", "49")),
       # Reverse code 1:5 --> 5:1
       ~ abs(. - 6)
     )) |>
     mutate(across(
       ends_with(c(
-        "17", "18", "19", "20", "21", "23", "25", "27", "28"
+        "35", "36", "37", "38", "41", "42", "43", "44"
       )),
       # Reverse and recode "no sex. activity" as 0
       # 1:6 --> 0, 5:1
@@ -390,7 +390,7 @@ iief <- \(dat) {
       )
     )) |>
     mutate(across(
-      ends_with(c("22", "24", "26", "31", "32", "33")),
+      ends_with(c("39", "40")),
       # Minus one
       ~ . - 1
     ))
@@ -399,14 +399,14 @@ iief <- \(dat) {
   # Erectile Function[E], Orgasmic Function[OF], Sexual Desire[S],
   # Intercourse Satisfaction[I], Overall Satisfaction[OS]
   x <- x |>
-    mutate(IIEF_E  = x[[1]] + x[[2]] + x[[3]] + x[[4]] + x[[5]] + x[[15]]) |>
-    mutate(IIEF_OF = x[[9]] + x[[10]]) |>
-    mutate(IIEF_S  = x[[11]] + x[[12]]) |>
-    mutate(IIEF_I  = x[[6]] + x[[7]] + x[[8]]) |>
-    mutate(IIEF_OS = x[[13]] + x[[14]])
+    mutate(IIEF_E  = rowSums(x[1:5]) + x[[15]]) |>
+    mutate(IIEF_OF = rowSums(x[9:10])) |>
+    mutate(IIEF_S  = rowSums(x[11:12])) |>
+    mutate(IIEF_I  = rowSums(x[6:8])) |>
+    mutate(IIEF_OS = rowSums(x[13:14]))
   
-  x <- x |> mutate(IIEF = rowSums(pick(20:25)), .after = 19)
-  fsfi <- x |> select(contains("IIEF"))
+  x <- x |> mutate(IIEF = rowSums(pick(16:20)), .after = 15)
+  iief <- x |> select(contains("IIEF"))
   
   dat |> add_column(iief, .after = max(range))
 }
