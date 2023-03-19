@@ -254,8 +254,8 @@ iri <- \(dat) {
   # (to change range from 1:5 to 0:4)
   # Reverse code items 2, 6, 7, and 8
   x <- x |>
-    mutate(across(everything(), minus_one)) |>
-    mutate(across(ends_with(c("_2", "_6", "_7", "_8")), reverse_iri))
+    mutate(across(everything(), ~ . - 1)) |>
+    mutate(across(ends_with(c("_2", "_6", "_7", "_8")), ~ abs(. - 4)))
 
   dat <- dat |> mutate(IRI_C = rowSums(x), .after = max(range))
 
@@ -290,10 +290,7 @@ iri_pt <- \(dat, iri_dat) {
   return(dat)
 }
 
-# Helper Functions
-reverse_iri <- \(x) abs(x - 4)
 
-minus_one <- \(x) x - 1
 
 # Experiences in Close Relationship Scale (ECR-S)
 ecr <- \(dat) {
@@ -344,15 +341,12 @@ gmsex <- \(dat) {
   x <- dat |> select(all_of(range))
 
   # Reverse code all items
-  x <- x |> mutate(across(everything(), reverse_7))
+  x <- x |> mutate(across(everything(), ~ abs(. - 8)))
 
   dat <- dat |> mutate(GMSEX = rowSums(x), .after = max(range))
 
   return(dat)
 }
-
-reverse_7 <- \(x) abs(x - 8)
-
 
 # Female Sexual Function Index (FSFI)
 fsfi <- \(dat) {
@@ -365,12 +359,15 @@ fsfi <- \(dat) {
   x <- x |>
     mutate(across(
       ends_with(c("15", "16", "29", "30")),
+      # Reverse code 1:5 --> 5:1
       ~ abs(. - 6)
     )) |>
     mutate(across(
       ends_with(c(
         "17", "18", "19", "20", "21", "23", "25", "27", "28"
       )),
+      # Reverse and recode "no sex. activity" as 0
+      # 1:6 --> 0, 5:1
       \(.) case_when(
         . == 1 ~ 0,
         .default = abs(. - 7)
@@ -378,6 +375,7 @@ fsfi <- \(dat) {
     )) |>
     mutate(across(
       ends_with(c("22", "24", "26", "31", "32", "33")),
+      # Minus one
       ~ . - 1
     ))
 
@@ -399,22 +397,6 @@ fsfi <- \(dat) {
   return(dat)
 }
 
-
-
-# Reverse code 1:5 --> 5:1
-reverse_5 <- \(x) abs(x - 6)
-
-# reverse_5 <- \(x) {abs(x - 6)}
-
-# Reverse and recode "no sex. activity" as 0
-# 1:6 --> 0, 5:1
-reverse_6 <- \(x) {
-  case_when(
-    x == 1 ~ 0,
-    #   x > 1 ~ abs(x - 7),
-    .default = abs(x - 7)
-  )
-}
 
 # International Index of Erectile Function (IIEF)
 iief <- \(dat) {
