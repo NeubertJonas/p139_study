@@ -7,7 +7,7 @@
 #
 # Load Packages -----------------------------------------------------------
 
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 library(conflicted)
 library(tidyverse)

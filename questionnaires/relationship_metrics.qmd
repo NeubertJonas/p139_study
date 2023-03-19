@@ -1,4 +1,18 @@
-```{r message = FALSE}
+---
+title: "My document"
+format:
+  html
+---
+
+```{r chunk_1, echo=TRUE, message=FALSE, warning=TRUE}
+source("relationship_metrics.R")
+import_data()
+calculate_metrics()
+get_results(follow_up)
+```
+```{r}
+library(reactable)
+reactable(follow_up)
 
 ```
 
