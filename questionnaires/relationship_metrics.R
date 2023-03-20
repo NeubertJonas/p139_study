@@ -299,14 +299,12 @@ fsfi <- \(dat) {
 
   x <- x |>
     mutate(across(
-      ends_with(c("15", "16", "29", "30")),
+      c(15, 16, 29, 30),
       # Reverse code 1:5 --> 5:1
       ~ abs(. - 6)
     )) |>
     mutate(across(
-      ends_with(c(
-        "17", "18", "19", "20", "21", "23", "25", "27", "28"
-      )),
+      c(17:21, 23, 25, 27, 29),
       # Reverse and recode "no sex. activity" as 0
       # 1:6 --> 0, 5:1
       \(.) case_when(
@@ -315,7 +313,7 @@ fsfi <- \(dat) {
       )
     )) |>
     mutate(across(
-      ends_with(c("22", "24", "26", "31", "32", "33")),
+      c(22, 24, 26, 31, 32, 33),
       # Minus one
       ~ . - 1
     ))
@@ -347,14 +345,12 @@ iief <- \(dat) {
 
   x <- x |>
     mutate(across(
-      ends_with(c("45", "46", "47", "48", "49")),
+      c(45:49),
       # Reverse code 1:5 --> 5:1
       ~ abs(. - 6)
     )) |>
     mutate(across(
-      ends_with(c(
-        "35", "36", "37", "38", "41", "42", "43", "44"
-      )),
+      c(35:38, 41:44),
       # Reverse and recode "no sex. activity" from 1 to 0
       # 1:6 --> 0, 5:1
       \(.) case_when(
@@ -363,7 +359,7 @@ iief <- \(dat) {
       )
     )) |>
     mutate(across(
-      ends_with(c("39", "40")),
+      c(39, 40),
       # Minus one
       ~ . - 1
     ))
