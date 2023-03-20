@@ -25,8 +25,8 @@ conflicts_prefer(
 # Define files and their location below:
 
 sources <- c(
-  baseline = "questionnaires/data/questionnaire_1.csv",
-  follow_up = "questionnaires/data/questionnaire_2.csv"
+  baseline = "data/baseline.csv",
+  follow_up = "data/questionnaire_2.csv"
 )
 
 # Locating Data ------------------------------------------------------------
@@ -48,23 +48,21 @@ sources <- c(
 
 locations <- vector(mode = "list", length = 0)
 
-# Just placeholder, not the final column names.
 locations[["baseline"]] <- tribble(
-  ~name,       ~start,  ~item_count,
-  "ID",        "Q2",    1,
-  "Day",       "Q3",    1,
-  "Gender",    "Q4",    1,
-  "CSI_4",     "Q5",    4,
-  "SWLS",      "Q9_1",  5,
-  "PPRS_12",   "Q10_1", 12,
-  "PPRS_12_U", "Q10_3", 5,
-  "PPRS_12_V", "Q10_8", 5,
-  "IRI_C",     "Q11_1", 13,
-  "ECR_S",     "Q12_1", 12,
-  "GMSEX",     "Q13_1", 5,
-  "FSFI",      "Q15",   19,
-  "IIEF",      "Q35",   15,
-  "Other",     "Q50",   4
+  ~name,          ~start,  ~item_count,
+  "ID",           "Q2",    1,
+  "Psychedelics", "Q3",    1,
+  "SWLS",         "Q7_1",  5,
+  "CSI_4",        "Q8",    4,
+  "PPRS_12",      "Q12_1", 12,
+  "PPRS_12_U",    "Q12_3", 5,
+  "PPRS_12_V",    "Q12_8", 5,
+  "ECR_S",        "Q13_1", 12,
+  "IRI_C",        "Q14_1", 13,
+  "GMSEX",        "Q15_1", 5,
+  "Sex",          "Q16",   1,
+  "FSFI",         "Q18",   19,
+  "IIEF",         "Q38",   15,
 )
 
 locations[["follow_up"]] <- tribble(
@@ -85,6 +83,7 @@ locations[["follow_up"]] <- tribble(
   "Other",     "Q50",   4
 )
 
+# TODO: Sex != Gender (change in Qualtrics)
 
 # Import Data -------------------------------------------------------------
 #
@@ -101,7 +100,7 @@ import_data <- \() {
   
   for (i in seq_along(sources)) {
     assign("ds", names(sources[i]), pos = 1)
-    col_names <- names(read_csv(sources[1],
+    col_names <- names(read_csv(sources[i],
       n_max = 0,
       show_col_types = FALSE
     ))
@@ -115,6 +114,7 @@ import_data <- \() {
       rename(ID = column("ID")) |>
       rename(Day = column("Day")) |>
       filter(grepl("139", ID)) |>
+      mutate(across(ID, as.character)) |> 
       mutate(ID = if_else(str_starts(ID, "139"),
         paste0("P", ID), ID
       ))
@@ -382,7 +382,7 @@ iief <- \(dat) {
       ends_with(c(
         "35", "36", "37", "38", "41", "42", "43", "44"
       )),
-      # Reverse and recode "no sex. activity" as 0
+      # Reverse and recode "no sex. activity" from 1 to 0
       # 1:6 --> 0, 5:1
       \(.) case_when(
         . == 1 ~ 0,
@@ -410,5 +410,4 @@ iief <- \(dat) {
   
   dat |> add_column(iief, .after = max(range))
 }
-
 
