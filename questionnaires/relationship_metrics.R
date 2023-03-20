@@ -7,7 +7,7 @@
 #
 # Load Packages -----------------------------------------------------------
 
-# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 library(conflicted)
 library(tidyverse)
@@ -55,8 +55,6 @@ locations[["baseline"]] <- tribble(
   "SWLS",         "Q7_1",  5,
   "CSI_4",        "Q8",    4,
   "PPRS_12",      "Q12_1", 12,
-  "PPRS_12_U",    "Q12_3", 5,
-  "PPRS_12_V",    "Q12_8", 5,
   "ECR_S",        "Q13_1", 12,
   "IRI_C",        "Q14_1", 13,
   "GMSEX",        "Q15_1", 5,
@@ -73,8 +71,6 @@ locations[["follow_up"]] <- tribble(
   "CSI_4",     "Q5",    4,
   "SWLS",      "Q9_1",  5,
   "PPRS_12",   "Q10_1", 12,
-  "PPRS_12_U", "Q10_3", 5,
-  "PPRS_12_V", "Q10_8", 5,
   "IRI_C",     "Q11_1", 13,
   "ECR_S",     "Q12_1", 12,
   "GMSEX",     "Q13_1", 5,
@@ -97,7 +93,7 @@ import_data <- \() {
     "RecipientEmail", "ExternalReference", "LocationLatitude",
     "LocationLongitude", "DistributionChannel", "UserLanguage"
   )
-  
+
   for (i in seq_along(sources)) {
     assign("ds", names(sources[i]), pos = 1)
     col_names <- names(read_csv(sources[i],
@@ -114,13 +110,12 @@ import_data <- \() {
       rename(ID = column("ID")) |>
       rename(Day = column("Day")) |>
       filter(grepl("139", ID)) |>
-      mutate(across(ID, as.character)) |> 
+      mutate(across(ID, as.character)) |>
       mutate(ID = if_else(str_starts(ID, "139"),
         paste0("P", ID), ID
       ))
 
     assign(names(sources[i]), dat, pos = 1)
-    
   }
   rm(ds, pos = 1)
 }
@@ -136,7 +131,7 @@ calculate_metrics <- \() {
       iri() |>
       ecr() |>
       gmsex() |>
-      fsfi() |> 
+      fsfi() |>
       iief()
     assign(names(sources[i]), dat, pos = 1)
   }
@@ -220,34 +215,20 @@ swls <- \(dat) {
 pprs <- \(dat) {
   range <- get_range(dat, "PPRS_12")
   x <- dat |> select(all_of(range))
-  dat <- dat |> mutate(PPRS_12 = rowSums(x), .after = max(range))
-
-  dat <- dat |>
-    pprs_u() |>
-    pprs_v()
-
-  return(dat)
-}
-
-# TODO: Integrate into pprs()
-# PPRS: Understanding subscale
-pprs_u <- \(dat) {
-  range <- get_range(dat, "PPRS_12_U")
-  x <- dat |> select(all_of(range))
-  dat <- dat |> mutate(PPRS_12_U = rowSums(x), .after = PPRS_12)
+  
+  # Understanding subscale
+  pprs_u <- x |> select(3:7)
+  
+  # Validation subscale
+  pprs_v <- x |> select(8:12)
+  
+  dat <- dat |> mutate(PPRS_12 = rowSums(x), .after = max(range)) |> 
+    mutate(PPRS_12_U = rowSums(pprs_u), .after = PPRS_12) |> 
+    mutate(PPRS_12_V = rowSums(pprs_v), .after = PPRS_12)
 
   return(dat)
 }
 
-# TODO: Integrate into pprs()
-# PPRS: Validation subscale
-pprs_v <- \(dat) {
-  range <- get_range(dat, "PPRS_12_V")
-  x <- dat |> select(all_of(range))
-  dat <- dat |> mutate(PPRS_12_V = rowSums(x), .after = PPRS_12)
-
-  return(dat)
-}
 
 # Interpersonal Reactivity Index for Couples (IRI-C)
 iri <- \(dat) {
@@ -258,22 +239,18 @@ iri <- \(dat) {
   # (to change range from 1:5 to 0:4)
   # Reverse code items 2, 6, 7, and 8
   x <- x |>
-    mutate(across(everything(), ~ . - 1)) |>
-    mutate(across(ends_with(c("_2", "_6", "_7", "_8")), ~ abs(. - 4)))
-  
-  # IRI-C: Empathic Concern scale
-  iri_ec <- x |> select(
-    ends_with(c("_1", "_2", "_4", "_6", "_8", "_9", "_11"))
-  )
-  
-  # IRI-C: Perspective Taking scale
-  iri_pt <- x |> select(
-    !ends_with(c("_1", "_2", "_4", "_6", "_8", "_9", "_11"))
-  )
+    mutate(across(everything(), ~ . - 1)) |> 
+    mutate(across(c(2, 6:8), ~ abs(. - 4)))
 
-  dat <- dat |> 
-    mutate(IRI_C = rowSums(x), .after = max(range)) |> 
-    mutate(IRI_C_EC = rowSums(iri_ec), .after = IRI_C) |> 
+  # IRI-C: Empathic Concern scale
+  iri_ec <- x |> select(c(1, 2, 4, 6, 8, 9, 11))
+
+  # IRI-C: Perspective Taking scale
+  iri_pt <- x |> select(!c(1, 2, 4, 6, 8, 9, 11))
+
+  dat <- dat |>
+    mutate(IRI_C = rowSums(x), .after = max(range)) |>
+    mutate(IRI_C_EC = rowSums(iri_ec), .after = IRI_C) |>
     mutate(IRI_C_PT = rowSums(iri_pt), .after = IRI_C)
 
   return(dat)
@@ -285,21 +262,17 @@ ecr <- \(dat) {
   x <- dat |> select(all_of(range))
 
   # Reverse code items 1, 5, 8, and 9
-  x <- x |> mutate(across(
-    ends_with(c("_1", "_5", "_8", "_9")),
-    ~ abs(. - 8)
-  ))
+  x <- x |> mutate(across(c(1, 5, 8, 9), ~ abs(. - 8)))
   
-  ecr_an <- x |> select(
-    ends_with(c("_2", "_4", "_6", "_8", "_10", "_12"))
-  )
+  # Attachment Anxiety subscale
+  ecr_an <- x |> select(c(2, 4, 6, 8, 10, 12))
+  
+  # Attachment Avoidance subscale
+  ecr_av <- x |> select(!c(2, 4, 6, 8, 10, 12))
 
-  ecr_av <- x |> select(
-    !ends_with(c("_2", "_4", "_6", "_8", "_10", "_12"))
-  )
-
-  dat <- dat |> mutate(ECR_S = rowSums(x), .after = max(range)) |> 
-    mutate(ECR_S_AN = rowSums(ecr_an), .after = ECR_S) |> 
+  dat <- dat |>
+    mutate(ECR_S = rowSums(x), .after = max(range)) |>
+    mutate(ECR_S_AN = rowSums(ecr_an), .after = ECR_S) |>
     mutate(ECR_S_AV = rowSums(ecr_av), .after = ECR_S)
 
   return(dat)
@@ -370,8 +343,8 @@ iief <- \(dat) {
   x <- dat |>
     #   filter(Q4 == 1) |>
     select(all_of(range))
-  
-  
+
+
   x <- x |>
     mutate(across(
       ends_with(c("45", "46", "47", "48", "49")),
@@ -394,20 +367,19 @@ iief <- \(dat) {
       # Minus one
       ~ . - 1
     ))
-  
+
   # Calculate domains (subscales):
   # Erectile Function[E], Orgasmic Function[OF], Sexual Desire[S],
   # Intercourse Satisfaction[I], Overall Satisfaction[OS]
   x <- x |>
-    mutate(IIEF_E  = rowSums(x[1:5]) + x[[15]]) |>
+    mutate(IIEF_E = rowSums(x[1:5]) + x[[15]]) |>
     mutate(IIEF_OF = rowSums(x[9:10])) |>
-    mutate(IIEF_S  = rowSums(x[11:12])) |>
-    mutate(IIEF_I  = rowSums(x[6:8])) |>
+    mutate(IIEF_S = rowSums(x[11:12])) |>
+    mutate(IIEF_I = rowSums(x[6:8])) |>
     mutate(IIEF_OS = rowSums(x[13:14]))
-  
+
   x <- x |> mutate(IIEF = rowSums(pick(16:20)), .after = 15)
   iief <- x |> select(contains("IIEF"))
-  
+
   dat |> add_column(iief, .after = max(range))
 }
-
