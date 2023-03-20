@@ -1,7 +1,8 @@
 ---
 title: "My document"
+prefer-html: true
 format:
-  html
+  pdf: default
 ---
 
 ```{r chunk_1, echo=TRUE, message=FALSE, warning=TRUE}
@@ -10,9 +11,15 @@ import_data()
 calculate_metrics()
 get_results(follow_up)
 ```
+
 ```{r}
-library(reactable)
-reactable(follow_up)
+# library(reactable)
+# reactable(follow_up)
 
 ```
 
+| Right | Left | Default | Center |
+|------:|:-----|---------|:------:|
+|    12 | 12   | 12      |   12   |
+|   123 | 123  | 123     |  123   |
+|     1 | 1    | 1       |   1    |

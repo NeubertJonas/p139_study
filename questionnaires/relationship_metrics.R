@@ -25,8 +25,8 @@ conflicts_prefer(
 # Define files and their location below:
 
 sources <- c(
-  baseline = "data/questionnaire_1.csv",
-  follow_up = "data/questionnaire_2.csv"
+  baseline = "questionnaires/data/questionnaire_1.csv",
+  follow_up = "questionnaires/data/questionnaire_2.csv"
 )
 
 # Locating Data ------------------------------------------------------------
