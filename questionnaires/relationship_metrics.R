@@ -88,7 +88,8 @@ locations[["follow_up"]] <- tribble(
 
 import_data <- \() {
   drop_col <- c(
-    "StartDate", "EndDate", "Status", "IPAddress", "Progress",
+    "StartDate", "EndDate", "Duration (in seconds)", 
+    "Status", "IPAddress", "Progress", "Finished",
     "ResponseId", "RecipientLastName", "RecipientFirstName",
     "RecipientEmail", "ExternalReference", "LocationLatitude",
     "LocationLongitude", "DistributionChannel", "UserLanguage"
@@ -162,30 +163,44 @@ get_range <- \(dat, name) {
   c(x:y)
 }
 
-
-# Results for Scales
-# Leaving "participant" and "column" blank will return data for
-# all participants and all scales
-# Vectors are allowed as input, e.g.,
-# get_results(dat, c("P13902", "P13901"), c("CSI_4", "SWLS"))
-get_results <- \(dat, participant = NA, column = NA) {
-  if (is.logical(participant) && is.logical(column)) {
-    results <- dat |> select(any_of(c(locations[[1]]$name)))
-  } else if (!is.logical(participant) && !is.logical(column)) {
-    results <- dat |>
-      select(any_of(c("ID", column))) |>
-      filter(ID == participant)
-  } else if (!is.logical(column)) {
-    results <- dat |> select(any_of(c("ID", column)))
-  } else if (!is.logical(participant)) {
-    results <- dat |>
-      select(any_of(c(locations[[1]]$name))) |>
-      filter(ID == participant)
+get_results <- \(dat, test, participant = FALSE, subscales = TRUE) {
+  if (!participant) participant = unique(dat[["ID"]])
+  
+  if (subscales) {
+    dat |> filter(ID == participant) |> 
+      select(ID | starts_with(test))
+  } else {
+    dat |> filter(ID == participant) |> 
+      select(ID | eval(test))
   }
-
-  return(results)
 }
 
+get_overview <- \(dat, basic = FALSE) {
+  if (!basic) {
+    dat |> select(!starts_with("Q"))
+  } else {
+    dat |>
+      select(!starts_with("Q")) |>
+      select(!ends_with(c(
+        "_V",
+        "_U",
+        "_AV",
+        "_AN",
+        "_PT",
+        "_EC",
+        "_D",
+        "_A",
+        "_L",
+        "_O",
+        "_S",
+        "_P",
+        "_E",
+        "_OF",
+        "_I",
+        "_OS"
+      )))
+  }
+}
 
 # Questionnaire Functions -------------------------------------------------
 # Note. Scores for scales will be NA if any questions were skipped.
@@ -382,3 +397,5 @@ import_data()
 calculate_metrics()
 baseline_results <- get_results(baseline)
 follow_up_results <- get_results(follow_up)
+baseline_overview <- get_overview(baseline, T)
+follow_up_overview <- get_overview(follow_up, T)
