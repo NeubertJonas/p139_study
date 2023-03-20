@@ -215,15 +215,16 @@ swls <- \(dat) {
 pprs <- \(dat) {
   range <- get_range(dat, "PPRS_12")
   x <- dat |> select(all_of(range))
-  
+
   # Understanding subscale
   pprs_u <- x |> select(3:7)
-  
+
   # Validation subscale
   pprs_v <- x |> select(8:12)
-  
-  dat <- dat |> mutate(PPRS_12 = rowSums(x), .after = max(range)) |> 
-    mutate(PPRS_12_U = rowSums(pprs_u), .after = PPRS_12) |> 
+
+  dat <- dat |>
+    mutate(PPRS_12 = rowSums(x), .after = max(range)) |>
+    mutate(PPRS_12_U = rowSums(pprs_u), .after = PPRS_12) |>
     mutate(PPRS_12_V = rowSums(pprs_v), .after = PPRS_12)
 
   return(dat)
@@ -239,7 +240,7 @@ iri <- \(dat) {
   # (to change range from 1:5 to 0:4)
   # Reverse code items 2, 6, 7, and 8
   x <- x |>
-    mutate(across(everything(), ~ . - 1)) |> 
+    mutate(across(everything(), ~ . - 1)) |>
     mutate(across(c(2, 6:8), ~ abs(. - 4)))
 
   # IRI-C: Empathic Concern scale
@@ -263,10 +264,10 @@ ecr <- \(dat) {
 
   # Reverse code items 1, 5, 8, and 9
   x <- x |> mutate(across(c(1, 5, 8, 9), ~ abs(. - 8)))
-  
+
   # Attachment Anxiety subscale
   ecr_an <- x |> select(c(2, 4, 6, 8, 10, 12))
-  
+
   # Attachment Avoidance subscale
   ecr_av <- x |> select(!c(2, 4, 6, 8, 10, 12))
 
@@ -293,18 +294,17 @@ gmsex <- \(dat) {
 fsfi <- \(dat) {
   range <- get_range(dat, "FSFI")
   x <- dat |>
-    #   filter(Q4 == 1) |>
     select(all_of(range))
 
 
   x <- x |>
     mutate(across(
-      c(15, 16, 29, 30),
+      c(1, 2, 15, 16),
       # Reverse code 1:5 --> 5:1
       ~ abs(. - 6)
     )) |>
     mutate(across(
-      c(17:21, 23, 25, 27, 29),
+      c(3:7, 9, 11, 13, 15),
       # Reverse and recode "no sex. activity" as 0
       # 1:6 --> 0, 5:1
       \(.) case_when(
@@ -313,7 +313,7 @@ fsfi <- \(dat) {
       )
     )) |>
     mutate(across(
-      c(22, 24, 26, 31, 32, 33),
+      c(8, 10, 12, 17, 18, 19),
       # Minus one
       ~ . - 1
     ))
@@ -339,18 +339,16 @@ fsfi <- \(dat) {
 iief <- \(dat) {
   range <- get_range(dat, "IIEF")
   x <- dat |>
-    #   filter(Q4 == 1) |>
     select(all_of(range))
-
 
   x <- x |>
     mutate(across(
-      c(45:49),
+      c(11:15),
       # Reverse code 1:5 --> 5:1
       ~ abs(. - 6)
     )) |>
     mutate(across(
-      c(35:38, 41:44),
+      c(1:4, 7:10),
       # Reverse and recode "no sex. activity" from 1 to 0
       # 1:6 --> 0, 5:1
       \(.) case_when(
@@ -359,7 +357,7 @@ iief <- \(dat) {
       )
     )) |>
     mutate(across(
-      c(39, 40),
+      c(5, 6),
       # Minus one
       ~ . - 1
     ))
@@ -379,3 +377,8 @@ iief <- \(dat) {
 
   dat |> add_column(iief, .after = max(range))
 }
+
+import_data()
+calculate_metrics()
+baseline_results <- get_results(baseline)
+follow_up_results <- get_results(follow_up)
