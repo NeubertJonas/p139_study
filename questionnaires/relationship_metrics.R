@@ -27,7 +27,7 @@ conflicts_prefer(
 
 sources <- c(
   baseline = "data/baseline.csv",
-  follow_up = "data/questionnaire_2.csv"
+  follow_up = "data/follow_up.csv"
 )
 
 # Locating Data ------------------------------------------------------------
