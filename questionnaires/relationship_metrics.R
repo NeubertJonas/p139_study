@@ -7,6 +7,7 @@
 #
 # Load Packages -----------------------------------------------------------
 
+# Set working directory to current file location
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 library(conflicted)
@@ -163,8 +164,8 @@ get_range <- \(dat, name) {
   c(x:y)
 }
 
-get_results <- \(dat, test, participant = FALSE, subscales = TRUE) {
-  if (!participant) participant = unique(dat[["ID"]])
+get_results <- \(dat, test, participant = "all", subscales = TRUE) {
+  if (participant[1] == "all") participant = unique(dat[["ID"]])
   
   if (subscales) {
     dat |> filter(ID == participant) |> 
@@ -393,9 +394,61 @@ iief <- \(dat) {
   dat |> add_column(iief, .after = max(range))
 }
 
+
+# Run Script --------------------------------------------------------------
+
+# First, import the data:
 import_data()
+# You know have the raw data for baseline and follow_up questionnaires
+# in the R environment as tibbles (special data tables from the tidyverse).
+
+# Second, calculate all questionnaire scores and add them to those tibbles
 calculate_metrics()
-baseline_results <- get_results(baseline)
-follow_up_results <- get_results(follow_up)
-baseline_overview <- get_overview(baseline, T)
-follow_up_overview <- get_overview(follow_up, T)
+# The function goes through all scales and extracts their associated items.
+# Then necessary calculations are performed. Mainly reverse coding or changing
+# the range of responses from 1:6 to 0:5 for example. 
+# Then subscales and final scores are calculated. The results are added back
+# to the main tibbles in separate columns.
+
+# Extracting Data Easily
+
+# I provide two more functions to easily access the results. I added examples
+# how to use them below.
+
+# get_results() provides results for a specific test.
+get_results(baseline, "PPRS_12")
+
+# If you're only interested in one participant:
+get_results(baseline, "PPRS_12", "P13901")
+
+# Two or more participants:
+get_results(baseline, "IRI_C", c("P13901", "P13902"))
+
+# Without the subscales:
+get_results(baseline, "IRI_C", c("P13901", "P13902"), subscales = FALSE)
+
+# Two or more tests:
+get_results(follow_up, c("SWLS", "CSI_4", "ECR_S"))
+
+
+# Use get_overview() to see all calculated scores at once.
+
+get_overview(baseline)
+get_overview(follow_up)
+
+# Exclude subscales
+
+get_overview(baseline, basic = TRUE)
+get_overview(follow_up, basic = TRUE)
+
+# Those two functions return a tibble, which can be saved and then used
+# for further analysis.
+
+overview <- get_overview(baseline, basic = TRUE)
+
+# Print overview
+print(overview)
+
+# Print overview for participants 1 and 2
+print(filter(overview, ID == "P13901" | ID == "P13902"))
+
