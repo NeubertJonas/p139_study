@@ -23,12 +23,29 @@ conflicts_prefer(
 #
 # Download the data as comma separated values (csv) file from Qualtrics.
 # Select "Download all fields" and "Use numeric values" as options.
-# Define files and their location below:
+# Download files anywhere the working directory. No need to rename them.
+#
+# Script is designed for the following three Qualtrics surveys.
+# "TrainingDay_baseline" -> baseline
+# "Follow up" -> follow_up
+# "At home questionnaire" -> home
 
-sources <- c(
-  baseline = "data/baseline.csv",
-  follow_up = "data/follow_up.csv"
-)
+# Automatically detect the three files.
+files = list.files(pattern = "[[:alnum:]]+.csv$", 
+               full.names = TRUE, recursive = TRUE)
+sources = c(
+  baseline = files[grep("TrainingDay_Baseline", files, fixed = TRUE)],
+  follow_up = files[grep("Follow+up", files, fixed = TRUE)],
+  home = files[grep("At+home+questionnaire", files, fixed = TRUE)]
+  )
+rm(files)
+
+# Alternatively, define files manually like so:
+# sources <- c(
+#   baseline = "data/baseline.csv",
+#   follow_up = "data/follow_up.csv",
+#   home = "data/home.csv"
+# )
 
 # Locating Data ------------------------------------------------------------
 #
@@ -65,6 +82,16 @@ locations[["baseline"]] <- tribble(
 )
 
 locations[["follow_up"]] <- tribble(
+  ~name,       ~start,  ~item_count,
+  "ID",        "Q1.2",    1,
+  "Day",       "Q1.3",    1,
+  "SWLS",      "Q2.1_1",  5,
+  "CSI_4",     "Q3.1",    4,
+  "IOS",       "Q1",      1,
+  "GMSEX",     "Q4.1_1",  5
+)
+
+locations[["home"]] <- tribble(
   ~name,       ~start,  ~item_count,
   "ID",        "Q2",    1,
   "Day",       "Q3",    1,
@@ -160,6 +187,11 @@ get_count <- \(x) {
 # Range of columns belonging to a scale
 get_range <- \(dat, name) {
   x <- which(names(dat) == column(name))
+  
+  # Catch cases when questionnaire is not present
+  # E.g., the PPRS_12 in the follow_up questionnaire
+  if (identical(x, integer(0))) return(NA)
+    
   y <- x + get_count(name) - 1
   c(x:y)
 }
@@ -212,6 +244,10 @@ get_overview <- \(dat, basic = FALSE) {
 
 csi <- \(dat) {
   range <- get_range(dat, "CSI_4")
+  
+  # Exit early if questionnaire is not found.
+  if (is.na(range[1])) return(dat)
+  
   x <- dat |> select(all_of(range))
   dat <- dat |> mutate(CSI_4 = rowSums(x) - 4, .after = max(range))
 
@@ -221,6 +257,8 @@ csi <- \(dat) {
 # Satisfaction with Life Scale (SWLS)
 swls <- \(dat) {
   range <- get_range(dat, "SWLS")
+  if (is.na(range[1])) return(dat)
+  
   x <- dat |> select(all_of(range))
   dat <- dat |> mutate(SWLS = rowSums(x), .after = max(range))
 
@@ -230,6 +268,8 @@ swls <- \(dat) {
 # Perceived Partner Responsiveness Scale (PPRS)
 pprs <- \(dat) {
   range <- get_range(dat, "PPRS_12")
+  if (is.na(range[1])) return(dat)
+  
   x <- dat |> select(all_of(range))
 
   # Understanding subscale
@@ -250,6 +290,8 @@ pprs <- \(dat) {
 # Interpersonal Reactivity Index for Couples (IRI-C)
 iri <- \(dat) {
   range <- get_range(dat, "IRI_C")
+  if (is.na(range[1])) return(dat)
+  
   x <- dat |> select(all_of(range))
 
   # Subtract 1 from all items for scoring
@@ -276,6 +318,8 @@ iri <- \(dat) {
 # Experiences in Close Relationship Scale (ECR-S)
 ecr <- \(dat) {
   range <- get_range(dat, "ECR_S")
+  if (is.na(range[1])) return(dat)
+  
   x <- dat |> select(all_of(range))
 
   # Reverse code items 1, 5, 8, and 9
@@ -298,6 +342,8 @@ ecr <- \(dat) {
 # Global Measure of Sexual Satisfaction (GMSEX)
 gmsex <- \(dat) {
   range <- get_range(dat, "GMSEX")
+  if (is.na(range[1])) return(dat)
+  
   x <- dat |> select(all_of(range))
 
   # Reverse code all items
@@ -309,6 +355,8 @@ gmsex <- \(dat) {
 # Female Sexual Function Index (FSFI)
 fsfi <- \(dat) {
   range <- get_range(dat, "FSFI")
+  if (is.na(range[1])) return(dat)
+  
   x <- dat |>
     select(all_of(range))
 
@@ -354,6 +402,8 @@ fsfi <- \(dat) {
 # International Index of Erectile Function (IIEF)
 iief <- \(dat) {
   range <- get_range(dat, "IIEF")
+  if (is.na(range[1])) return(dat)
+  
   x <- dat |>
     select(all_of(range))
 
@@ -428,13 +478,14 @@ get_results(baseline, "IRI_C", c("P13901", "P13902"))
 get_results(baseline, "IRI_C", c("P13901", "P13902"), subscales = FALSE)
 
 # Two or more tests:
-get_results(follow_up, c("SWLS", "CSI_4", "ECR_S"))
+get_results(home, c("SWLS", "CSI_4", "ECR_S"))
 
 
 # Use get_overview() to see all calculated scores at once.
 
 get_overview(baseline)
 get_overview(follow_up)
+get_overview(home)
 
 # Exclude subscales
 
