@@ -31,7 +31,7 @@ conflicts_prefer(
 # "At home questionnaire" -> home
 
 # Automatically detect the three files.
-files = list.files(pattern = "[[:alnum:]]+.csv$", 
+files = list.files("./data_fake/", pattern = "[[:alnum:]]+.csv$", 
                full.names = TRUE, recursive = TRUE)
 sources = c(
   baseline = files[grep("TrainingDay_Baseline", files, fixed = TRUE)],
@@ -116,7 +116,7 @@ locations[["home"]] <- tribble(
 
 import_data <- \() {
   drop_col <- c(
-    "StartDate", "EndDate", "Duration (in seconds)", 
+    "StartDate", "EndDate", "Duration (in seconds)", "RecordedDate",
     "Status", "IPAddress", "Progress", "Finished",
     "ResponseId", "RecipientLastName", "RecipientFirstName",
     "RecipientEmail", "ExternalReference", "LocationLatitude",
@@ -444,6 +444,21 @@ iief <- \(dat) {
   dat |> add_column(iief, .after = max(range))
 }
 
+# Combine all data in one tibble ------------------------------------------
+import_data()
+calculate_metrics()
+
+baseline_2 <- get_overview(baseline) |> 
+  mutate(Day = "0", .after = ID)
+
+
+follow_up_2 <- get_overview(follow_up) |> 
+  mutate(Day = paste(Day, "_FU1"))
+
+home_2 <- get_overview(home) |> 
+  mutate(Day = paste(Day, "_FU2"))
+
+combination <- bind_rows(baseline_2, follow_up_2, home_2)
 
 # Run Script --------------------------------------------------------------
 
@@ -483,9 +498,9 @@ get_results(home, c("SWLS", "CSI_4", "ECR_S"))
 
 # Use get_overview() to see all calculated scores at once.
 
-get_overview(baseline)
-get_overview(follow_up)
-get_overview(home)
+baseline_o <- get_overview(baseline)
+follow_up_o <- get_overview(follow_up)
+home_o <- get_overview(home)
 
 # Exclude subscales
 
