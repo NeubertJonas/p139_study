@@ -1,6 +1,7 @@
 ---
-title: "A Quarto Page Layout Example"
-subtitle: "Inspired by Tufte Handout, Using Quarto"
+title: "Results from Relationship Questionnaires"
+subtitle: "Proof of Concept: Presenting Data Using Quarto"
+author: "Jonas Neubert"
 date: "`r Sys.Date()`"
 format:
     pdf: default
@@ -41,6 +42,24 @@ These layout features are designed with two important goals in mind:
 [^2]: You never need to think about `\begin{marginfigure}` or `<span class="marginfigure">`; the LaTeX and HTML code under the hood may be complicated, but you never need to learn or write such code.
 
 If you have any feature requests or find bugs in this capabilities, please do not hesitate to file them to [https://github.com/quarto-dev/quarto-cli/issues](https://github.com/rstudio/tufte/issues){.uri}.
+
+```{r}
+#| label: load-packages
+#| include: false
+
+source("relationship_metrics.R")
+n = unique(combination$ID)
+```
+
+Data loaded for the following participants: `r n`
+
+```{r}
+print(n)
+```
+
+```{r}
+print(n)
+```
 
 # Figures
 

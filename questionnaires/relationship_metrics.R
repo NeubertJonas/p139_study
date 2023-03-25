@@ -8,7 +8,7 @@
 # Load Packages -----------------------------------------------------------
 
 # Set working directory to current file location
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 library(conflicted)
 library(tidyverse)
@@ -460,6 +460,9 @@ home_2 <- get_overview(home) |>
 
 combination <- bind_rows(baseline_2, follow_up_2, home_2)
 
+
+rm(baseline_2, follow_up_2, home_2)
+
 # Run Script --------------------------------------------------------------
 
 # First, import the data:
@@ -498,9 +501,9 @@ get_results(home, c("SWLS", "CSI_4", "ECR_S"))
 
 # Use get_overview() to see all calculated scores at once.
 
-baseline_o <- get_overview(baseline)
-follow_up_o <- get_overview(follow_up)
-home_o <- get_overview(home)
+# baseline_o <- get_overview(baseline)
+# follow_up_o <- get_overview(follow_up)
+# home_o <- get_overview(home)
 
 # Exclude subscales
 
@@ -510,11 +513,11 @@ get_overview(follow_up, basic = TRUE)
 # Those two functions return a tibble, which can be saved and then used
 # for further analysis.
 
-overview <- get_overview(baseline, basic = TRUE)
+# overview <- get_overview(baseline, basic = TRUE)
 
 # Print overview
-print(overview)
+# print(overview)
 
 # Print overview for participants 1 and 2
-print(filter(overview, ID == "P13901" | ID == "P13902"))
+# print(filter(overview, ID == "P13901" | ID == "P13902"))
 
