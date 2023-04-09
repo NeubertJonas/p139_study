@@ -1,6 +1,6 @@
 ---
-title: "Presentating Data with Quarto"
-subtitle: "A Proof of Concept Using Relationship Questionnaires"
+title: "Results from Relationship Questionnaires"
+subtitle: "Proof of Concept: Presenting Data Using Quarto"
 author: "Jonas Neubert"
 date: "`r Sys.Date()`"
 format:
@@ -14,13 +14,9 @@ bibliography: skeleton.bib
 
 # Introduction
 
-This is a demonstration how Quarto[^1] and R can be used to produce a document which contains data from the hyperscanning study. The goal is to write my master thesis in this format, because RStudio can replace Excel (data cleaning/preparation), SPSS (statistical analysis), EndNote (citation management), and Word (writing text) by offering all those steps within one integrated environment.
+This document demonstrates the use of a number of these page layout features to produce an attractive and usable document inspired by the Tufte handout style and the use of Tufte's styles in RMarkdown documents [@xie2018]. The Tufte handout style is a style that Edward Tufte uses in his books and handouts. Tufte's style is known for its extensive use of sidenotes, tight integration of graphics with text, and well-set typography. Quarto[^1] supports most of the layout techniques that are used in the Tufte handout style for both HTML and LaTeX/PDF output.
 
-[^1]: Quarto is an open-source scientific and technical publishing system, which represents the evolution of R Markdown. It offers integration of R, Python, Julia, and Observable JS. To learn more, you can read more about [Quarto](https://www.quarto.org) or check out this [PhD thesis from Leiden University](https://bengoudsmit.github.io/Thesis/) written in R Markdown.
-
-## Layout
-
-The basis for this document was a template inspired by the Tufte handout style [@xie2018] available on [GitHub](https://github.com/quarto-dev/quarto-gallery/blob/main/page-layout/tufte.qmd). The Tufte handout style is a style that Edward Tufte uses in his books and handouts. Tufte's style is known for its extensive use of sidenotes, tight integration of graphics with text, and well-set typography. Quarto supports most of the layout techniques that are used in the Tufte handout style for both HTML and LaTeX/PDF output.
+[^1]: To learn more, you can read more about [Quarto](https://www.quarto.org) or visit [Quarto's Github repository](https://www.github.com/quarto-dev/quarto-cli).
 
 ``` yaml
 ---

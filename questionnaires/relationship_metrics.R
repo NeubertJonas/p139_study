@@ -31,7 +31,7 @@ conflicts_prefer(
 # "At home questionnaire" -> home
 
 # Automatically detect the three files.
-files = list.files("./data_fake/", pattern = "[[:alnum:]]+.csv$", 
+files = list.files("./data/", pattern = "[[:alnum:]]+.csv$", 
                full.names = TRUE, recursive = TRUE)
 sources = c(
   baseline = files[grep("TrainingDay_Baseline", files, fixed = TRUE)],
