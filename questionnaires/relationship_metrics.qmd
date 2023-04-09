@@ -22,20 +22,27 @@ This is a demonstration how Quarto[^1] and R can be used to produce a document w
 
 The basis for this document was a template inspired by the Tufte handout style [@xie2018] available on [GitHub](https://github.com/quarto-dev/quarto-gallery/blob/main/page-layout/tufte.qmd). The Tufte handout style is a style that Edward Tufte uses in his books and handouts. Tufte's style is known for its extensive use of sidenotes, tight integration of graphics with text, and well-set typography. Quarto supports most of the layout techniques that are used in the Tufte handout style for both HTML and LaTeX/PDF output.
 
-``` yaml
----
-title: "An Example Using the Tufte Style"
-author: "John Smith"
-format:
-  html: default
-  pdf: default
-  
-# places footnotes and cited sources in the margin
-# other layout options (for example placing a 
-# figure in the margin)  will be set on per element
-# in examples below
-reference-location: margin
----
+# Raw Data from Qualtrics
+
+```{r}
+#| label: load-packages
+#| include: false
+
+source("relationship_metrics.R")
+n = sort(unique(combination$ID))
+```
+
+First, the raw data needs to be downloaded as csv files for three Qualtrics questionnaires: TrainingDay_Baseline, Follow-Up, and At Home Questionnaire. When downloading, make sure to select *numeric choice* rather than *choice text*. There is no need to rename the files, but they need to be placed in the *data* folder. At the time of writing (partial) data for the following participants is available: `r n`.
+
+## Complete versus Partial Data
+
+As the data collection is still ongoing, the raw data contains both complete and partial data sets. Let's have a closer look at that:
+
+```{r}
+#| tbl-cap-location: margin
+library(kableExtra)
+kable(arrange(combination[,1:2], ID),
+      caption = "Data availablility per participant. 0: Baseline; 1_FU1: 1st block, follow-up in the lab; 1_FU2: 1st block, follow-up at home")
 ```
 
 These layout features are designed with two important goals in mind:
@@ -46,24 +53,6 @@ These layout features are designed with two important goals in mind:
 [^2]: You never need to think about `\begin{marginfigure}` or `<span class="marginfigure">`; the LaTeX and HTML code under the hood may be complicated, but you never need to learn or write such code.
 
 If you have any feature requests or find bugs in this capabilities, please do not hesitate to file them to [https://github.com/quarto-dev/quarto-cli/issues](https://github.com/rstudio/tufte/issues){.uri}.
-
-```{r}
-#| label: load-packages
-#| include: false
-
-source("relationship_metrics.R")
-n = sort(unique(combination$ID))
-```
-
-Data loaded for the following participants: `r n`
-
-```{r}
-print(n)
-```
-
-```{r}
-print(n)
-```
 
 # Figures
 
