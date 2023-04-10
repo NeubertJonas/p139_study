@@ -3,10 +3,16 @@ title: "Presentating Data with Quarto"
 subtitle: "A Proof of Concept Using Relationship Questionnaires"
 author: "Jonas Neubert"
 date: "`r Sys.Date()`"
+prefer-html: true
 format:
-    pdf: default
+    # docx: default
+    # pdf:
+    #   execute:
+    #     echo: false
+    #     warning: false
     html: 
       self-contained: true
+      echo: false
 reference-location: margin
 citation-location: margin
 bibliography: skeleton.bib
@@ -29,247 +35,216 @@ The basis for this document was a template inspired by the Tufte handout style [
 #| include: false
 
 source("relationship_metrics.R")
-n = sort(unique(combination$ID))
+n = sort(unique(get_progress()$ID))
 ```
 
 First, the raw data needs to be downloaded as csv files for three Qualtrics questionnaires: TrainingDay_Baseline, Follow-Up, and At Home Questionnaire. When downloading, make sure to select *numeric choice* rather than *choice text*. There is no need to rename the files, but they need to be placed in the *data* folder. At the time of writing (partial) data for the following participants is available: `r n`.
 
-## Complete versus Partial Data
+## Data Collection Progress
 
-As the data collection is still ongoing, the raw data contains both complete and partial data sets. Let's have a closer look at that:
+As the data collection is still ongoing, the raw data contains both complete and partial data sets. Relevant data for my master thesis are recorded at baseline, the follow-up testing day at the lab two days after dosing (FU_1 and FU_3) and the at-home follow-up questionnaire (FU_2 and FU_4) four days after dosing. Let's have a closer look at that:
 
 ```{r}
+#| label: collection-progress
 #| tbl-cap-location: margin
+#| tbl-cap: "**Data availability per participant.**"
 library(kableExtra)
-kable(arrange(combination[,1:2], ID),
-      caption = "Data availablility per participant. 0: Baseline; 1_FU1: 1st block, follow-up in the lab; 1_FU2: 1st block, follow-up at home")
+kable(get_progress())
 ```
 
-These layout features are designed with two important goals in mind:
-
-1.  To produce both PDF and HTML output with similar styles from the same Quarto document;
-2.  To provide simple syntax to write elements of the Tufte style such as side notes and margin figures. If you'd like a figure placed in the margin, just set the option `fig-column: margin` for your code chunk, and we will take care of the details for you[^2].
-
-[^2]: You never need to think about `\begin{marginfigure}` or `<span class="marginfigure">`; the LaTeX and HTML code under the hood may be complicated, but you never need to learn or write such code.
-
-If you have any feature requests or find bugs in this capabilities, please do not hesitate to file them to [https://github.com/quarto-dev/quarto-cli/issues](https://github.com/rstudio/tufte/issues){.uri}.
-
-# Figures
-
-## Margin Figures
-
-Images and graphics play an integral role in Tufte's work. To place figures in the margin you can use the **Quarto** chunk option `column: margin`. For example:
-
-```{r}
-#| label: fig-margin
-#| fig-cap: "MPG vs horsepower, colored by transmission."
-#| column: margin
-#| message: false
-library(ggplot2)
-mtcars2 <- mtcars
-mtcars2$am <- factor(
-      mtcars$am,
-      labels = c("automatic", "manual")
-)
-ggplot(mtcars2, aes(hp, mpg, color = am)) +
-      geom_point() +
-      geom_smooth() +
-      theme(legend.position = "bottom")
-```
-
-Note the use of the `fig-cap` chunk option to provide a figure caption. You can adjust the proportions of figures using the `fig-width` and `fig-height` chunk options. These are specified in inches, and will be automatically scaled down to fit within the handout margin.
-
-## Arbitrary Margin Content
-
-You can include anything in the margin by places the class `.column-margin` on the element. See an example on the right about the first fundamental theorem of calculus.
-
-::: column-margin
-We know from *the first fundamental theorem of calculus* that for $x$ in $[a, b]$:
-
-$$\frac{d}{dx}\left( \int_{a}^{x} f(u)\,du\right)=f(x).$$
+::: callout-note
+Test data in Qualtrics are automatically skipped during data import, which includes subject IDs such as `999`. This is achieved by only selecting IDs containing `139` via `filter(grepl("139", ID))`.
 :::
 
-## Full Width Figures
+## Overview
 
-You can arrange for figures to span across the entire page by using the chunk option `fig-column: page-right`.
+| Name                                               | Baseline | FU_1 & FU_3 | FU_2 & FU_4 |
+|-----------------------------------|:----------:|:----------:|:----------:|
+| [Couple Satisfaction Index (CSI-4)](#sec-csi)                  |    ✓     |      ✓      |      ✓      |
+| [Satisfaction with Life Scale (SWLS)](#sec-swls)               |    ✓     |      ✓      |      ✓      |
+| [Perceived Partner Responsiveness Scale (PPRS)](#sec-pprs)     |    ✓     |             |      ✓      |
+| [Interpersonal Reactivity Index for Couples (IRI-C)](#sec-iri) |    ✓     |             |      ✓      |
+| [Experiences in Close Relationships Scale (ECR-S)](#sec-ecr)   |    ✓     |             |      ✓      |
+| [Global Measure of Sexual Satisfaction (GMSEX)](#sec-gmsex)    |    ✓     |      ✓      |      ✓      |
+| [Female Sexual Function Index (FSFI)](#sec-fsfi)               |    ✓     |             |      ✓      |
+| [International Index of Erectile Function (IIEF)](#sec-iief)   |    ✓     |             |      ✓      |
 
-```{r}
-#| label: fig-fullwidth
-#| fig-cap: "A full width figure."
-#| fig-width: 11
-#| fig-height: 3
-#| column: page-right
-#| warning: false
-ggplot(diamonds, aes(carat, price)) +
-      geom_smooth() +
-      facet_grid(~cut)
-```
+: Questionnaires and when they are recorded.
 
-Other chunk options related to figures can still be used, such as `fig-width`, `fig-cap`, and so on. For full width figures, usually `fig-width` is large and `fig-height` is small. In the above example, the plot size is $11 \times 3$.
-
-## Arbitrary Full Width Content
-
-Any content can span to the full width of the page, simply place the element in a `div` and add the class `column-page-right`. For example, the following code will display its contents as full width.
-
-``` md
-::: {.fullwidth}
-Any _full width_ content here.
-:::
-```
-
-Below is an example:
-
-::: column-page-right
-*R is free software and comes with ABSOLUTELY NO WARRANTY.* You are welcome to redistribute it under the terms of the GNU General Public License versions 2 or 3. For more information about these matters see https://www.gnu.org/licenses/.
+::: {.callout-note title="Missing Questionnaires?"}
+Please note that the above table does not contain all questionnaires recorded during those days, but simple those directly related to relationships and sexuality.
 :::
 
-## Main Column Figures
+# Couple Satisfaction Index (CSI-4) {#sec-csi}
 
-Besides margin and full width figures, you can of course also include figures constrained to the main column. This is the default type of figures in the LaTeX/HTML output.
+Definition
+:   A 4-item, psychometrically optimized, self-report scale assessing relationship satisfaction.
 
-```{r}
-#| label: fig-main
-#| fig-cap: "A figure in the main column."
-ggplot(diamonds, aes(cut, price)) +
-      geom_boxplot()
-```
-
-## Margin Captions
-
-When you include a figure constrained to the main column, you can choose to place the figure's caption in the margin by using the `cap-location` chunk option. For example:
+The function `csi()` is applied to the raw data from Qualtrics to calculate the CSI-4:
 
 ```{r}
-#| label: fig-main-margin-cap
-#| fig-cap: "A figure with a longer caption. The figure appears in the main column, but the caption is placed in the margin. Caption can even contain elements like a citation such as @xie2018."
-#| cap-location: margin
-ggplot(diamonds, aes(cut, price)) +
-      geom_boxplot()
+#| label: csi-example
+#| eval: false
+#| echo: true
+csi <- \(dat) {
+  range <- get_range(dat, "CSI_4")    # <1>
+  x <- dat |> select(all_of(range))   # <2>
+  dat <- dat |> mutate(CSI_4 = rowSums(x) - 4, .after = max(range)) # <3>
+}
+```
+1. Look up where the CSI is located
+2. Save just those four items in a new tibble
+3. Calculate the sum and subtract 4 for the final score
+
+```{r}
+#| label: csi
+ggplot(combination[], aes(x = ID, y = CSI_4, fill = Day)) +
+  geom_col(position = "dodge2") +
+  geom_hline(aes(yintercept = 13.5), colour = "gray4", show.legend = FALSE) +
+  ggtitle("CSI-4") +
+  ylab(NULL) + labs( caption = "Values below the horizontal line (13.5) suggest relationship dissatisfaction.")
+
 ```
 
-# Sidenotes
+# Perceived Partner Responsiveness Scale (PPRS-12) {#sec-pprs}
 
-One of the most prominent and distinctive features of this style is the extensive use of sidenotes. There is a wide margin to provide ample room for sidenotes and small figures. Any use of a footnote will automatically be converted to a sidenote.
+```{r}
+#| label: pprs
+pprs <- combination |>
+  select(ID, Day, PPRS_12_U, PPRS_12_V) |>
+  pivot_longer(c("PPRS_12_V", "PPRS_12_U"), names_to = "PPRS_12") |>
+  filter(!is.na(value))
 
-[This is a span that has the class `column-margin` which places it in the margin without the sidenote mark.]{.column-margin} If you'd like to place ancillary information in the margin without the sidenote mark (the superscript number), you can use apply the `column-margin` class to the element.
+ggplot(pprs, aes(x = Day, y = value, fill = PPRS_12)) +
+  geom_col() +
+  facet_grid(. ~ ID, scales = "free", space = "free_x") +
+  ggtitle("PPRS-12") +
+  scale_fill_discrete(name = "Subscales", labels = c("Understanding", "Validation")) +
+  ylab(NULL)
 
-# References
+```
 
-References can be displayed as margin notes for HTML output. For example, we can cite R here [@R-base].
+# Satisfaction with Life Scale (SWLS) {#sec-swls}
 
-::: {.callout-note appearance="simple"}
-This feature depends upon `link-citations` to locate and place references in the margin. This is enabled by default, but if you disable `link-citations` then references in the HTML output will be placed at the end of the output document as they normally are.
+```{r}
+#| label: swls
+
+ggplot(combination, aes(x = ID, y = SWLS, fill = Day)) +
+  geom_col(position = "dodge2") +
+  geom_hline(aes(yintercept = 20), colour = "gray4", show.legend = FALSE) +
+  ggtitle("SWLS") +
+  ylab(NULL) + labs( caption = "Values below the horizontal line (20) suggest dissatisfaction.")
+
+```
+
+# Interpersonal Reactivity Index for Couples (IRI-C) {#sec-iri}
+```{r}
+#| label: iri
+iri <- combination |>
+  select(ID, Day, IRI_C_PT, IRI_C_EC) |>
+  pivot_longer(c("IRI_C_EC", "IRI_C_PT"), names_to = "IRI") |>
+  filter(!is.na(value))
+
+ggplot(iri, aes(x = Day, y = value, fill = IRI)) +
+  geom_col() +
+  facet_grid(. ~ ID, scales = "free", space = "free_x") +
+  ggtitle("IRI-C") +
+  scale_fill_discrete(name = "Subscales", labels = c("Empathic Concern", "Perspective Taking")) +
+  ylab(NULL)
+
+```
+
+# Experiences in Close Relationships Scale (ECR-S) {#sec-ecr}
+
+```{r}
+#| label: ecr
+ecr <- combination |>
+  select(ID, Day, ECR_S_AV, ECR_S_AN) |>
+  pivot_longer(c("ECR_S_AV", "ECR_S_AN"), names_to = "ECR") |>
+  filter(!is.na(value))
+
+ggplot(ecr, aes(x = Day, y = value, fill = ECR)) +
+  geom_col() +
+  facet_grid(. ~ ID, scales = "free", space = "free_x") +
+  ggtitle("ECR-S") +
+  scale_fill_discrete(name = "Subscales", labels = c("Attachment Anxiety", "Attachment Avoidance")) +
+  ylab(NULL)
+
+```
+
+# Global Measure of Sexual Satisfaction (GMSEX) {#sec-gmsex}
+
+```{r}
+#| label: gmsex
+ggplot(combination, aes(x = ID, y = GMSEX, fill = Day)) +
+  geom_col(position = "dodge2") +
+  ggtitle("GMSEX") +
+  ylab(NULL)
+
+```
+
+# Female Sexual Function Index (FSFI) {#sec-fsfi}
+
+```{r}
+#| label: fsfi
+library(plotly)
+fsfi <- combination |>
+  select(ID, Day, starts_with("FSFI")) |>
+  pivot_longer(starts_with("FSFI"), names_to = "Subscale") |>
+  filter(!is.na(value)) |>
+  filter(!(Subscale == "FSFI")) |>
+  mutate(across(3, \(.) case_when(
+    . == "FSFI_A" ~ "Arousal",
+    . == "FSFI_D" ~ "Desire",
+    . == "FSFI_L" ~ "Lubrication",
+    . == "FSFI_O" ~ "Orgasm",
+    . == "FSFI_S" ~ "Satisfaction",
+    . == "FSFI_P" ~ "Pain",
+    .default = .
+  )))
+
+p <- ggplot(fsfi, aes(x = Day, y = value, fill = Subscale)) +
+  geom_col() +
+  facet_grid(. ~ ID, scales = "free", space = "free_x") +
+  scale_fill_brewer(palette = "Pastel1", name = "Subscales") +
+  ylab(NULL) +
+  ggtitle("FSFI")
+#  scale_fill_viridis_d(option = "E")
+
+ggplotly(p, tooltip = c("Subscale", "value"))
+
+```
+
+
+::: callout-note
+This is an interactive plot created via Plotly. You can hover your mouse over it to see individual values for subscales.
 :::
 
-# Tables
-
-You can use the `kable()` function from the **knitr** package to format tables that integrate well with the rest of the Tufte handout style. The table captions are placed in the margin like figures in the HTML output.
+# International Index of Erectile Function (IIEF) {#sec-iief}
 
 ```{r}
-#| tbl-cap-location: margin
-knitr::kable(
-      mtcars[1:6, 1:6],
-      caption = "A subset of mtcars."
-)
+#| label: iief
+
+iief <- combination |>
+  select(ID, Day, starts_with("IIEF")) |>
+  pivot_longer(starts_with("IIEF"), names_to = "Subscale") |>
+  filter(!is.na(value)) |>
+  filter(!(Subscale == "IIEF")) |>
+  mutate(across(3, \(.) case_when(
+    . == "IIEF_E" ~ "Erectile Function",
+    . == "IIEF_OF" ~ "Orgasmic Function",
+    . == "IIEF_S" ~ "Sexual Desire",
+    . == "IIEF_I" ~ "Intercourse Satisfaction",
+    . == "IIEF_OS" ~ "Overall Satisfaction",
+    .default = .
+  )))
+
+p <- ggplot(iief, aes(x = Day, y = value, fill = Subscale)) +
+  geom_col() +
+  facet_grid(. ~ ID, scales = "free", space = "free_x") +
+  scale_fill_brewer(palette = "Pastel2", name = "Subscales")
+#  scale_fill_viridis_d(option = "E")
+
+ggplotly(p, tooltip = c("Subscale", "value"))
 ```
 
-# Responsiveness
-
-The HTML page layout is responsive- as the page width shrinks, elements will automatically adjust their position. Elements that appear in the margins will move inline with the content and elements that span the body and margin will automatically span only the body.
-
-# More Examples
-
-The rest of this document consists of a few test cases to make sure everything still works well in slightly more complicated scenarios. First we generate two plots in one figure environment with the chunk option `fig.show = 'hold'`:
-
-```{r}
-#| label: fig-two-together
-#| fig-cap: "Two plots in one figure environment."
-#| fig.show: hold
-#| warning: false
-#| cap-location: margin
-p <- ggplot(mtcars2, aes(hp, mpg, color = am)) +
-      geom_point()
-p
-p + geom_smooth()
-```
-
-Then two plots in separate figure environments (the code is identical to the previous code chunk, but the chunk option is the default `fig.show = 'asis'` now):
-
-```{r fig-two-separate, ref.label='fig-two-together', fig.cap=sprintf("Two plots in separate figure environments (the %s plot).", c("first", "second")), message=FALSE}
-#| fig-cap-location: margin
-```
-
-You may have noticed that the two figures have different captions, and that is because we used a character vector of length 2 for the chunk option `fig.cap` (something like `fig.cap = c('first plot', 'second plot')`).
-
-Next we show multiple plots in margin figures. Similarly, two plots in the same figure environment in the margin:
-
-```{r}
-#| label: fig-margin-together
-#| fig-cap: "Two plots in one figure environment in the margin."
-#| fig-width: 3.5
-#| fig-height: 2
-#| fig-show: hold
-#| column: margin
-#| warning: false
-p
-p + geom_smooth(method = "lm")
-```
-
-Then two plots from the same code chunk placed in different figure environments:
-
-```{r}
-#| echo: false
-knitr::kable(head(iris[, c(1, 2, 3, 4)], 15))
-```
-
-```{r}
-#| label: fig-margin-separate-a
-#| fig-cap: Two plots in separate figure environments in the margin (the first plot)
-#| fig-width: 3.5
-#| fig-height: 2
-#| column: margin
-#| warning: false
-#| echo: false
-p
-p + geom_smooth(method = "lm")
-```
-
-```{r}
-#| echo: false
-knitr::kable(head(iris[, c(1, 2, 3, 4)], 12))
-```
-
-We blended some tables in the above code chunk only as *placeholders* to make sure there is enough vertical space among the margin figures, otherwise they will be stacked tightly together. For a practical document, you should not insert too many margin figures consecutively and make the margin crowded.
-
-You do not have to assign captions to figures. We show three figures with no captions below in the margin, in the main column, and in full width, respectively.
-
-```{r}
-#| fig-width: 3.5
-#| fig-height: 2
-#| column: margin
-# a boxplot of weight vs transmission; this figure
-# will be placed in the margin
-ggplot(mtcars2, aes(am, wt)) +
-      geom_boxplot() +
-      coord_flip()
-```
-
-```{r}
-#| warning: false
-# a figure in the main column
-p <- ggplot(mtcars, aes(wt, hp)) +
-      geom_point()
-p
-```
-
-```{r}
-#| fig-width: 11
-#| fig-height: 4
-#| column: page-right
-#| warning: false
-# a fullwidth figure
-p + geom_smooth(method = "lm") + facet_grid(~gear)
-```
-
-# Some Notes on Page Layout
-
-To see the Quarto markdown source of this example document, you may follow [this link to Github](https://raw.githubusercontent.com/quarto-dev/quarto-gallery/main/page-layout/tufte.qmd).
