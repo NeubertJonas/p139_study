@@ -31,7 +31,7 @@ conflicts_prefer(
 # "At home questionnaire" -> home
 
 # Automatically detect the three files.
-files = list.files("./data/", pattern = "[[:alnum:]]+.csv$", 
+files = list.files("data/", pattern = "[[:alnum:]]+.csv$", 
                full.names = TRUE, recursive = TRUE)
 sources = c(
   baseline = files[grep("TrainingDay_Baseline", files, fixed = TRUE)],
@@ -107,7 +107,6 @@ locations[["home"]] <- tribble(
   "Other",     "Q50",   4
 )
 
-# TODO: Sex != Gender (change in Qualtrics)
 
 # Import Data -------------------------------------------------------------
 #
@@ -235,6 +234,11 @@ get_overview <- \(dat, basic = FALSE) {
   }
 }
 
+get_progress <- \() {
+  
+  
+}
+
 # Questionnaire Functions -------------------------------------------------
 # Note. Scores for scales will be NA if any questions were skipped.
 
@@ -315,7 +319,7 @@ iri <- \(dat) {
   return(dat)
 }
 
-# Experiences in Close Relationship Scale (ECR-S)
+# Experiences in Close Relationships Scale (ECR-S)
 ecr <- \(dat) {
   range <- get_range(dat, "ECR_S")
   if (is.na(range[1])) return(dat)
@@ -445,33 +449,104 @@ iief <- \(dat) {
 }
 
 # Combine all data in one tibble ------------------------------------------
+get_progress <- \() {
+#  import_data()
+#  calculate_metrics()
+  
+  baseline_2 <- get_overview(baseline[,1:2]) |> 
+    mutate(Day = "Baseline", .after = ID)
+  
+  
+  follow_up_2 <- get_overview(follow_up[,1:2]) |>
+    mutate(Day = case_when(
+      Day == "1" ~ "1",
+      Day == "2" ~ "3"
+    )) |> 
+    mutate(Day = paste("FU_", Day))
+
+  home_2 <- get_overview(home[,1:2]) |>
+    mutate(Day = case_when(
+      Day == "1" ~ "2",
+      Day == "2" ~ "4"
+    )) |> 
+    mutate(Day = paste("FU_", Day)) 
+  
+  
+  progress <- bind_rows(baseline_2, follow_up_2, home_2) |> 
+    pivot_wider(names_from = Day, values_from = Day,
+                values_fill = "No") |> 
+    add_column("FU_3" = "No", "FU_4" = "No") |> 
+    mutate(across(2:6,
+                  \(.) case_when(
+                    . == "No" ~ "",
+                    .default = "✓"
+                  )
+    )) |> 
+    arrange(ID)
+  
+}
+
+get_combination <- \() {
+#  import_data()
+#  calculate_metrics()
+  
+  baseline_2 <- get_overview(baseline[]) |> 
+    mutate(Day = "Baseline", .after = ID)
+  
+  
+  follow_up_2 <- get_overview(follow_up[]) |>
+    mutate(Day = case_when(
+      Day == "1" ~ "1",
+      Day == "2" ~ "3"
+    )) |> 
+    mutate(Day = paste("FU_", Day))
+  
+  home_2 <- get_overview(home[]) |>
+    mutate(Day = case_when(
+      Day == "1" ~ "2",
+      Day == "2" ~ "4"
+    )) |> 
+    mutate(Day = paste("FU_", Day)) 
+  
+  
+  combination <- bind_rows(baseline_2, follow_up_2, home_2) |> 
+    arrange(ID)
+  
+}
 import_data()
 calculate_metrics()
-
-baseline_2 <- get_overview(baseline) |> 
-  mutate(Day = "0", .after = ID)
-
-
-follow_up_2 <- get_overview(follow_up) |> 
-  mutate(Day = paste(Day, "_FU1"))
-
-home_2 <- get_overview(home) |> 
-  mutate(Day = paste(Day, "_FU2"))
-
-combination <- bind_rows(baseline_2, follow_up_2, home_2)
-
-
-rm(baseline_2, follow_up_2, home_2)
+combination = get_combination()
+# import_data()
+# calculate_metrics()
+# 
+# baseline_2 <- get_overview(baseline) |> 
+#   mutate(Day = "0", .after = ID)
+# 
+# 
+# follow_up_2 <- get_overview(follow_up) |> 
+#   mutate(Day = paste(Day, "_FU1"))
+# 
+# home_2 <- get_overview(home) |> 
+#   mutate(Day = paste(Day, "_FU2"))
+# 
+# combination <- bind_rows(baseline_2, follow_up_2, home_2)
+# 
+# 
+# rm(baseline_2, follow_up_2, home_2)
 
 # Run Script --------------------------------------------------------------
 
 # First, import the data:
-import_data()
+
+# import_data()
+
 # You know have the raw data for baseline and follow_up questionnaires
 # in the R environment as tibbles (special data tables from the tidyverse).
 
 # Second, calculate all questionnaire scores and add them to those tibbles
-calculate_metrics()
+
+# calculate_metrics()
+
 # The function goes through all scales and extracts their associated items.
 # Then necessary calculations are performed. Mainly reverse coding or changing
 # the range of responses from 1:6 to 0:5 for example. 
@@ -484,19 +559,19 @@ calculate_metrics()
 # how to use them below.
 
 # get_results() provides results for a specific test.
-get_results(baseline, "PPRS_12")
+# get_results(baseline, "PPRS_12")
 
 # If you're only interested in one participant:
-get_results(baseline, "PPRS_12", "P13901")
+# get_results(baseline, "PPRS_12", "P13901")
 
 # Two or more participants:
-get_results(baseline, "IRI_C", c("P13901", "P13902"))
+# get_results(baseline, "IRI_C", c("P13901", "P13902"))
 
 # Without the subscales:
-get_results(baseline, "IRI_C", c("P13901", "P13902"), subscales = FALSE)
+# get_results(baseline, "IRI_C", c("P13901", "P13902"), subscales = FALSE)
 
 # Two or more tests:
-get_results(home, c("SWLS", "CSI_4", "ECR_S"))
+# get_results(home, c("SWLS", "CSI_4", "ECR_S"))
 
 
 # Use get_overview() to see all calculated scores at once.
@@ -507,8 +582,8 @@ get_results(home, c("SWLS", "CSI_4", "ECR_S"))
 
 # Exclude subscales
 
-get_overview(baseline, basic = TRUE)
-get_overview(follow_up, basic = TRUE)
+# get_overview(baseline, basic = TRUE)
+# get_overview(follow_up, basic = TRUE)
 
 # Those two functions return a tibble, which can be saved and then used
 # for further analysis.
