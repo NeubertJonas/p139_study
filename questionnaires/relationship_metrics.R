@@ -8,7 +8,7 @@
 # Load Packages -----------------------------------------------------------
 
 # Set working directory to current file location
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 library(conflicted)
 library(tidyverse)

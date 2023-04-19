@@ -58,7 +58,7 @@ Test data in Qualtrics are automatically skipped during data import, which inclu
 
 ## Overview
 
-| Name                                               | Baseline | FU_1 & FU_3 | FU_2 & FU_4 |
+| Name                                               | Baseline | SA @ lab | SA @ home |
 |-----------------------------------|:----------:|:----------:|:----------:|
 | [Couple Satisfaction Index (CSI-4)](#sec-csi)                  |    ✓     |      ✓      |      ✓      |
 | [Satisfaction with Life Scale (SWLS)](#sec-swls)               |    ✓     |      ✓      |      ✓      |
