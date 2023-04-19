@@ -8,7 +8,7 @@
 # Load Packages -----------------------------------------------------------
 
 # Set working directory to current file location
-# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 library(conflicted)
 library(tidyverse)
@@ -234,10 +234,6 @@ get_overview <- \(dat, basic = FALSE) {
   }
 }
 
-get_progress <- \() {
-  
-  
-}
 
 # Questionnaire Functions -------------------------------------------------
 # Note. Scores for scales will be NA if any questions were skipped.
@@ -459,30 +455,28 @@ get_progress <- \() {
   
   follow_up_2 <- get_overview(follow_up[,1:2]) |>
     mutate(Day = case_when(
-      Day == "1" ~ "1",
-      Day == "2" ~ "3"
-    )) |> 
-    mutate(Day = paste("FU_", Day))
+      Day == "1" ~ "SA1_lab",
+      Day == "2" ~ "SA3_lab"
+    )) 
 
   home_2 <- get_overview(home[,1:2]) |>
     mutate(Day = case_when(
-      Day == "1" ~ "2",
-      Day == "2" ~ "4"
-    )) |> 
-    mutate(Day = paste("FU_", Day)) 
+      Day == "1" ~ "SA1_home",
+      Day == "2" ~ "SA3_home"
+    )) 
   
   
   progress <- bind_rows(baseline_2, follow_up_2, home_2) |> 
     pivot_wider(names_from = Day, values_from = Day,
                 values_fill = "No") |> 
-    add_column("FU_3" = "No", "FU_4" = "No") |> 
     mutate(across(2:6,
                   \(.) case_when(
                     . == "No" ~ "",
                     .default = "✓"
                   )
     )) |> 
-    arrange(ID)
+    arrange(ID) |> 
+    relocate("SA1_home", .after = "SA1_lab")
   
 }
 
@@ -496,17 +490,15 @@ get_combination <- \() {
   
   follow_up_2 <- get_overview(follow_up[]) |>
     mutate(Day = case_when(
-      Day == "1" ~ "1",
-      Day == "2" ~ "3"
-    )) |> 
-    mutate(Day = paste("FU_", Day))
+      Day == "1" ~ "SA1_lab",
+      Day == "2" ~ "SA3_lab"
+    )) 
   
   home_2 <- get_overview(home[]) |>
     mutate(Day = case_when(
-      Day == "1" ~ "2",
-      Day == "2" ~ "4"
-    )) |> 
-    mutate(Day = paste("FU_", Day)) 
+      Day == "1" ~ "SA1_home",
+      Day == "2" ~ "SA3_home"
+    )) 
   
   
   combination <- bind_rows(baseline_2, follow_up_2, home_2) |> 
