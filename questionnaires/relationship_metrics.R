@@ -487,8 +487,8 @@ get_progress <- \() {
 }
 
 get_combination <- \() {
-#  import_data()
-#  calculate_metrics()
+  import_data()
+  calculate_metrics()
   
   baseline_2 <- get_overview(baseline[]) |> 
     mutate(Day = "Baseline", .after = ID)
@@ -596,3 +596,6 @@ combination = get_combination()
 # Print overview for participants 1 and 2
 # print(filter(overview, ID == "P13901" | ID == "P13902"))
 
+
+
+# write_csv(combination, "relationship_metrics_19.04.23.csv")
