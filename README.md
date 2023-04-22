@@ -1,4 +1,4 @@
-# Hyperscanning Study
+# P139 Study
 
 A collection of code for the ongoing study. Brief overview of the repository:
 
