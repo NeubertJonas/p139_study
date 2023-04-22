@@ -1,9 +1,9 @@
 # P96 - Data Wrangling ----------------------------------------------------
 #
-#
 # Adapts a wide data format for further analysis.
 #
-#
+
+
 # Load Packages -----------------------------------------------------------
 
 # Set working directory to current file location (shortcut)
@@ -68,9 +68,10 @@ for (i in seq_along(seeds)) {
 }
 rm(i)
 
+
 # Rotate Data -----------------------------------------------------------
 
-transpose_seed <- \(s) {
+rotate <- \(s) {
   dat[start[s]:end[s], ] |>
     rowid_to_column("ID") |>
     select(-"seed") |>
@@ -79,22 +80,25 @@ transpose_seed <- \(s) {
     remove_empty_cols()
 }
 
-for (s in seeds) {
-  assign(s, transpose_seed(s))
-}
-rm(s)
 
 # Combine Responses for Versions A, B, and C-----------------------------
 
 # Named list of tibbles
 output <- list(
-  "Version A" = bind_rows(pen, newspaper),
-  "Version B" = bind_rows(towel, bottle),
-  "Version C" = bind_rows(brick, shoe)
+  "Version A" = bind_rows(
+    rotate("pen"),
+    rotate("newspaper")
+  ),
+  "Version B" = bind_rows(
+    rotate("towel"),
+    rotate("bottle")
+  ),
+  "Version C" = bind_rows(
+    rotate("brick"),
+    rotate("shoe")
+  )
 )
-
 
 # Export to Excel ---------------------------------------------------------
 
 write_xlsx(output, path = "data/P96_wide_v1.xlsx")
-
