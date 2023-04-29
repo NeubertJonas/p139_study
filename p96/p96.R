@@ -3,9 +3,9 @@
 # Study: P96
 # Task: Alternative Uses
 #
-# Rearrange data from an Excel sheet to simplify further analysis (e.g., 
+# Rearrange data from an Excel sheet to simplify further analysis (e.g.,
 # (e.g., semantic distance).
-# 
+#
 # Author: Jonas Neubert (https://neubert.eu)
 # last updated: 29.04.2023
 
@@ -18,10 +18,10 @@
 # 1. The cells indicating version and seed word serve as markers when
 #     responses begin. Their location needs to align with the first response.
 #
-#     "Version A: Newspaper" moved from A39 to A38. 
+#     "Version A: Newspaper" moved from A39 to A38.
 #     Responses to "Newspaper" moved up by one to row 38 for subjects 1 to 34.
 #     (Responses for subjects 35 to 63 already started on row 38.)
-#     
+#
 #     "Version: C: Brick" moved from A152 to A149.
 #     Responses for subjects 2 to 31 moved to row 149.
 #     (Remaining subjects already started on row 149)
@@ -33,37 +33,41 @@
 #     the R script for the output file, but have been added to the
 #     new file "P96_Research_Notes.xlsx"
 #
-# 3. Export Excel file as comma separated values (csv) (UTF-8) file.
-#     (The second worksheet "Total score" can be ignored altogether)
-#
 #     NB: All formatting (e.g., responses marked with red font color) is lost
-#     when exporting as csv. Those would have to be added manually again to the
+#     when importing in R. Those would have to be added manually again to the
 #     output Excel file, if important for further analysis.
 #
-# 4. Place the csv file in the data folder.
+# 3. Make sure the Excel file is in the data folder and referenced correctly in
+#     line 63.
 #     (Content of the data folder is ignored by Git, see .gitignore)
 #     (The data folder and this script have to be in the same location.)
 
 # Load Packages -----------------------------------------------------------
 
-# Set working directory to current file location 
+# Set working directory to current file location
 # (Either use UI or uncomment the shortcut below)
 # setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
-library(readr)
+# Selected tidyverse packages
+# library(readr)
 library(dplyr)
 library(tibble)
+library(stringr)
+library(readxl)
+
 library(sjmisc, include.only = c("rotate_df", "remove_empty_cols"))
 library(openxlsx)
 
 # Import Data -------------------------------------------------------------
 
-# Only import first column and those starting with "P96"
-dat <- read_csv("data/p96.csv",
-  col_select = c(1, starts_with("P96")),
-  lazy = TRUE) |>
-  rename(seed = ...1)
-
+dat <- read_xlsx("data/P96_Alternative Uses_SilviaScoring_v2.xlsx",
+  .name_repair = "minimal",
+  trim_ws = TRUE
+) |>
+  select(c(
+    seed = 1,
+    starts_with("P96")
+  ))
 
 # Create Index ------------------------------------------------------------
 # Identify where each seed starts and ends
@@ -92,7 +96,6 @@ for (i in seq_along(seeds)) {
 }
 rm(i)
 
-
 # Rotate Data -----------------------------------------------------------
 
 rotate <- \(s) {
@@ -101,13 +104,19 @@ rotate <- \(s) {
     select(-"seed") |>
     rotate_df(cn = TRUE, rn = "subject") |>
     mutate(seed = str_to_title(s), .after = subject) |>
-    remove_empty_cols()
+    remove_empty_cols() |>
+    mutate(across(
+      everything(),
+      \(.) case_when(
+        grepl("^_", .) ~ NA,
+        .default = .
+      )
+    ))
 }
-
 
 # Combine Responses for Versions A, B, and C-----------------------------
 
-# Named list of tibbles
+# Named list of all data frames
 output <- list(
   "Version A" = bind_rows(
     rotate("pen"),
@@ -122,9 +131,23 @@ output <- list(
     rotate("shoe")
   )
 )
-
 # Export to Excel ---------------------------------------------------------
 
-if (!dir.exists("output")) {dir.create("output")}
+if (!dir.exists("output")) {
+  dir.create("output")
+}
 
-write.xlsx(output, file = "output/P96_wide_v2.xlsx", colWidths = "auto")
+hs <- createStyle(
+  fgFill = "#4F81BD", halign = "CENTER", textDecoration = "Bold",
+  border = "Bottom", fontColour = "white"
+)
+
+write.xlsx(output,
+  file = "output/P96_wide_v2.xlsx",
+  colWidths = "auto",
+  headerStyle = hs,
+  borders = "rows",
+  borderColour = "grey",
+  firstRow = TRUE,
+  firstCol = TRUE
+)
