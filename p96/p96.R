@@ -1,36 +1,60 @@
-# P96 - Data Wrangling ----------------------------------------------------
+# Alternative Uses: Change Data Format ------------------------------------
+
+# Study: P96
+# Task: Alternative Uses
 #
-# Adapts a wide data format for further analysis.
-#
-
-
-# Load Packages -----------------------------------------------------------
-
-# Set working directory to current file location (shortcut)
-# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-
-library(conflicted)
-library(tidyverse)
-library(sjmisc)
-library(writexl)
-
-conflicts_prefer(
-  dplyr::filter,
-  dplyr::lag
-)
-
+# Rearrange data from an Excel sheet to simplify further analysis (e.g., 
+# (e.g., semantic distance).
+# 
+# Author: Jonas Neubert (https://neubert.eu)
+# last updated: 29.04.2023
 
 # Preparation -------------------------------------------------------------
 
-# 1. The cells with "Version A: Pen", etc. are used as markers when
-# responses begin. Make sure these cells align with the first response!
-# Example: If "Version B: Towel" is in A81, all participant responses
-# have to start in row 81.
-# (I have already uploaded an adapted version to the rdm: "..._v2.xlsx")
-# 2. Export Excel file as csv
-# 3. Place in the data folder
-# (Everything saved there is ignored by Git, see .gitignore)
+# Some manual changes to the original Excel file are required to ensure
+# the R script runs smoothly. The following two changes were made and resulted
+# in the "P96_Alternative USes_SilviaScoring_v2.xlsx" file.
+#
+# 1. The cells indicating version and seed word serve as markers when
+#     responses begin. Their location needs to align with the first response.
+#
+#     "Version A: Newspaper" moved from A39 to A38. 
+#     Responses to "Newspaper" moved up by one to row 38 for subjects 1 to 34.
+#     (Responses for subjects 35 to 63 already started on row 38.)
+#     
+#     "Version: C: Brick" moved from A152 to A149.
+#     Responses for subjects 2 to 31 moved to row 149.
+#     (Remaining subjects already started on row 149)
+#
+#     No changes for the other seed words.
+#
+# 2. Research notes such as "(testday 1 for this participant)" were identified
+#     and tagged by adding a preceding underscore. They will be removed by
+#     the R script for the output file, but have been added to the
+#     new file "P96_Research_Notes.xlsx"
+#
+# 3. Export Excel file as comma separated values (csv) (UTF-8) file.
+#     (The second worksheet "Total score" can be ignored altogether)
+#
+#     NB: All formatting (e.g., responses marked with red font color) is lost
+#     when exporting as csv. Those would have to be added manually again to the
+#     output Excel file, if important for further analysis.
+#
+# 4. Place the csv file in the data folder.
+#     (Content of the data folder is ignored by Git, see .gitignore)
+#     (The data folder and this script have to be in the same location.)
 
+# Load Packages -----------------------------------------------------------
+
+# Set working directory to current file location 
+# (Either use UI or uncomment the shortcut below)
+# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+library(readr)
+library(dplyr)
+library(tibble)
+library(sjmisc, include.only = c("rotate_df", "remove_empty_cols"))
+library(openxlsx)
 
 # Import Data -------------------------------------------------------------
 
@@ -101,4 +125,6 @@ output <- list(
 
 # Export to Excel ---------------------------------------------------------
 
-write_xlsx(output, path = "data/P96_wide_v1.xlsx")
+if (!dir.exists("output")) {dir.create("output")}
+
+write.xlsx(output, file = "output/P96_wide_v2.xlsx", colWidths = "auto")
