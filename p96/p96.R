@@ -64,10 +64,10 @@ dat <- read_xlsx("data/P96_Alternative Uses_SilviaScoring_v2.xlsx",
   .name_repair = "minimal",
   trim_ws = TRUE
 ) |>
-  select(c(
+  select(
     seed = 1,
     starts_with("P96")
-  ))
+  )
 
 # Create Index ------------------------------------------------------------
 # Identify where each seed starts and ends
