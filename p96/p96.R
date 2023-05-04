@@ -6,8 +6,11 @@
 # Rearrange data from an Excel sheet to simplify further analysis (e.g.,
 # (e.g., semantic distance).
 #
+# Link to GitHub repository:
+# https://github.com/NeubertJonas/p139_study/blob/main/p96/p96.R
+#
 # Author: Jonas Neubert (https://neubert.eu)
-# last updated: 29.04.2023
+# last updated: 04.05.2023
 
 # Preparation -------------------------------------------------------------
 
@@ -42,19 +45,24 @@
 #     (Content of the data folder is ignored by Git, see .gitignore)
 #     (The data folder and this script have to be in the same location.)
 
-# Load Packages -----------------------------------------------------------
+# Set Working Directory ---------------------------------------------------
 
 # Set working directory to current file location
-# (Either use UI or uncomment the shortcut below)
+# (Either use UI or uncomment the API shortcut below)
+
 # setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
+# Load Packages -----------------------------------------------------------
+
 # Selected tidyverse packages
-# library(readr)
 library(dplyr)
 library(tibble)
 library(stringr)
 library(readxl)
+# Note: While readxl is part of the tidyverse,
+# it is not loaded by default when calling library(tidyverse)
 
+# Packages to extend the tidyverse and allow for Excel output
 library(sjmisc, include.only = c("rotate_df", "remove_empty_cols"))
 library(openxlsx)
 
@@ -97,6 +105,7 @@ for (i in seq_along(seeds)) {
 rm(i)
 
 # Rotate Data -----------------------------------------------------------
+# Also removes any cells starting with "_"
 
 rotate <- \(s) {
   dat[start[s]:end[s], ] |>
@@ -133,10 +142,12 @@ output <- list(
 )
 # Export to Excel ---------------------------------------------------------
 
+# Create folder if it is missing
 if (!dir.exists("output")) {
   dir.create("output")
 }
 
+# Optional styling for Excel
 hs <- createStyle(
   fgFill = "#4F81BD", halign = "CENTER", textDecoration = "Bold",
   border = "Bottom", fontColour = "white"
@@ -151,3 +162,7 @@ write.xlsx(output,
   firstRow = TRUE,
   firstCol = TRUE
 )
+
+# Clean-Up
+
+rm(hs, output, dat, end, seeds, start, rotate)
