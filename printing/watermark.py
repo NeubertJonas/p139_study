@@ -5,7 +5,7 @@ from typing import Union, Literal, List
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import mm, cm
 # from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A4, landscape
 
 from pypdf import PdfWriter, PdfReader, PdfMerger, Transformation
 
@@ -37,8 +37,9 @@ def header_portrait():
     pdf.save()
 
 
+
 def header_landscape():
-    pdf = canvas.Canvas("header_l.pdf", pagesize=A4)
+    pdf = canvas.Canvas("header_l.pdf", pagesize=landscape(A4))
     pdf.setFont("Courier-Bold", 12)
     pdf.drawString(87*mm, 196.5*mm, subject)
     pdf.drawString(141*mm, 196.5*mm, day)
@@ -114,7 +115,31 @@ def clean_up():
     os.remove("header_p.pdf")
     os.remove("header_l.pdf")
     os.remove("handout.pdf")
+    os.remove("ios.pdf")
+    os.remove("portrait.pdf")
+    os.remove("final_handout.pdf")
 
+def add_EGT_header(
+        egt_pdf: Path,
+        egt_header: Path,
+        pdf_result: Path,
+):
+    reader = PdfReader(egt_pdf)
+    reader_header = PdfReader(egt_header)
+    page_indices = list(range(0, len(reader.pages)))
+
+    writer = PdfWriter()
+
+    for index in page_indices:
+        content_page = reader.pages[index]
+        header_page = reader_header.pages[index]
+
+        content_page.merge_page(header_page)
+
+        writer.add_page(content_page)
+
+    with open(pdf_result, "wb") as fp:
+        writer.write(fp)
 
 
 
@@ -141,19 +166,11 @@ def sort_pages():
 
 
 
-
-
-
-header("TD_printing_per_participant_v3.pdf", "header_p.pdf", "portrait.pdf", portrait_pages)
-header("TD_printing_per_participant_v3.pdf", "header_l.pdf", "ios.pdf", ios_pages)
-header("TD_printing_per_participant_v3.pdf", "handout.pdf", "final_handout.pdf", handout_page)
+header("print_per_participant_TD_v4.pdf", "header_p.pdf", "portrait.pdf", portrait_pages)
+header("print_per_participant_TD_v4.pdf", "header_l.pdf", "ios.pdf", ios_pages)
+header("print_per_participant_TD_v4.pdf", "handout.pdf", "final_handout.pdf", handout_page)
 
 sort_pages()
 clean_up()
 
-# add_header("EGT_no_header.pdf", "header.pdf", "egt_with_header.pdf")
-
-# stamp("test.pdf", "stamp.pdf", output, vas_pages)
-
-# canvas.getAvailableFonts()
-# Pages containing VAS: 1,2,4,5,6,7, 21:26, 29, 30, 32, 33
+# add_EGT_header("EGT/EGT_no_header_short.pdf", "EGT/EGT_post_header_only.pdf", "EGT/egt_with_header.pdf")
