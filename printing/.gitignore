@@ -1,2 +1,10 @@
+# PDF output and templates
 *.pdf
+
+# Temporary files
 tmp.py
+__pycache__
+
+# Python virtual environment and Visual Studio Code settings
+.venv
+.vscode

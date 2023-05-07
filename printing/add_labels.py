@@ -5,7 +5,7 @@ for the acute testing day, with the exception of labels for blood samples.
 
 """
 
-# When running the script for the first time, 
+# When running the script for the first time,
 # run "pip install -r requirements.txt" in the terminal.
 
 # Import packages
@@ -21,112 +21,62 @@ from reportlab.lib.pagesizes import A4, landscape
 
 from pypdf import PdfWriter, PdfReader, PdfMerger
 
+from variables import *  # pylint: disable=W0401
+
 # pylint: disable=C0103
-
-# Define variables
-
-id_1 = input("Enter the first participant ID: P139")
-id_1 = "P139"+id_1
-id_2 = input("Enter the second participant ID: P139")
-id_2 = "P139"+id_2
-
-day = ""
-while day != "1" and day != "2":
-    day = input("First or second acute testing day? [1/2]: ")
-
-    if day != "1" and day != "2":
-        print("Invalid input. Please enter 1 or 2.")
-
-    if day == "1":
-        day = "A1"
-        break
-    elif day == "2":
-        day = "A3"
-        break
-
-date = input("Enter the date (e.g., 19.04.1943): ")
-output = "print_"+id_1+"+"+id_2+"_"+day+".pdf"
-
-# Define page ranges
-# Enter page numbers for IOS and handout
-# The rest uses the default portrait header
-
-ios = [2, 7, 17, 19, 26, 30, 33]
-handout = [34]
-portrait = list(range(0, 35))
-portrait = [x for x in portrait if x not in ios and x not in handout]
-
-
-# Define temporary file names
-
-portrait_tmp = "portrait_tmp.pdf"
-ios_tmp = "ios_tmp.pdf"
-handout_tmp = "handout_tmp.pdf"
-
-# Check if all required files exist
-
-per_participant = "print_per_participant_TD_v4.pdf"
-per_day = "print_per_testing_day_v2.pdf"
-
-
-try:
-    open(per_participant)
-except FileNotFoundError:
-    print("Error! Cannot find "+per_participant)
-    print("Add this file to the script directory and try again.")
-    sys.exit(1)
-
-try:
-    open(per_day)
-except FileNotFoundError:
-    print("Error! Cannot find "+per_day)
-    print("Add this file to the script directory and try again.")
- #   sys.exit(1)
-
 
 # Functions
 
-## Create header PDFs
+# Create header PDFs
 
-def header_portrait(id):
+def header_portrait(ID):
     """Create a PDF with the header for portrait pages."""
     pdf = canvas.Canvas(portrait_tmp, pagesize=A4)
     pdf.setFont("Courier-Bold", 12)
-    pdf.drawString(46*mm, 279.5*mm, id)
+    pdf.drawString(46*mm, 279.5*mm, ID)
     pdf.drawString(98*mm, 279.5*mm, day)
     pdf.setFont("Courier-Bold", 10)
     pdf.drawString(137.5*mm, 279.5*mm, date)
     pdf.save()
 
 
-def header_ios(id):
+def header_ios(ID):
     """Create a PDF with the header for landscape pages, namely the IOS."""
     pdf = canvas.Canvas(ios_tmp, pagesize=landscape(A4))
     pdf.setFont("Courier-Bold", 12)
-    pdf.drawString(87*mm, 196.5*mm, id)
+    pdf.drawString(87*mm, 196.5*mm, ID)
     pdf.drawString(141*mm, 196.5*mm, day)
     pdf.setFont("Courier-Bold", 10)
     pdf.drawString(180*mm, 196.5*mm, date)
     pdf.save()
 
 
-def id_handout(id):
+def id_handout(ID):
     """Create a PDF with the participant ID for the handout."""
     pdf = canvas.Canvas(handout_tmp, pagesize=A4)
     pdf.setFont("Courier-Bold", 26)
-    pdf.drawString(90.5*mm, 245.3*mm, id[-2:])
+    pdf.drawString(90.5*mm, 245.3*mm, ID[-2:])
     pdf.save()
 
 
+def header_couple():
+    """Create a PDF with the header for portrait pages."""
+    pdf = canvas.Canvas(couple_tmp, pagesize=A4)
+    pdf.setFont("Courier-Bold", 12)
+    pdf.drawString(98*mm, 279.5*mm, day)
+    pdf.setFont("Courier-Bold", 10)
+    pdf.drawString(137.5*mm, 279.5*mm, date)
+    ID = ID_1+" & "+ID_2
+    pdf.drawString(41*mm, 279.5*mm, ID)
+    pdf.save()
 
-# TODO: Combine header_pdf and content_pdf
 
 def header(
     content_pdf: Path,
     header_pdf: Path,
-    result_pdf: Path,
     page_indices: Union[Literal["ALL"], List[int]] = "ALL",
 ):
+    """Label the header with subject ID, study day, and date. """
     header_page = PdfReader(header_pdf).pages[0]
     writer = PdfWriter()
     reader = PdfReader(content_pdf)
@@ -139,25 +89,20 @@ def header(
         content_page.merge_page(header_page)
         writer.add_page(content_page)
 
-    with open(result_pdf, "wb") as fp:
+    with open(header_pdf, "wb") as fp:
         writer.write(fp)
 
 
+def combine_pages(ID):
+    """ Combine the output from header_ios(), header_portrait(), and id_handout() into one PDF. """
 
+    header_portrait(ID)
+    header_ios(ID)
+    id_handout(ID)
 
-
-
-def combine_pages(id):
-    """ Combine the output from header_ios(), header_portrait(), and id_handout() into one PDF.
-    """
-
-    header_portrait(id)
-    header_ios(id)
-    id_handout(id)
-
-    header(per_participant, portrait_tmp, portrait_tmp, portrait)
-    header(per_participant, ios_tmp, ios_tmp, ios)
-    header(per_participant, handout_tmp, handout_tmp, handout)
+    header(per_participant, portrait_tmp, portrait)
+    header(per_participant, ios_tmp, ios)
+    header(per_participant, handout_tmp, handout)
 
     portrait_pdf = PdfReader(portrait_tmp)
     ios_pdf = PdfReader(ios_tmp)
@@ -173,13 +118,11 @@ def combine_pages(id):
 
     merger.append(handout_pdf)
 
-    # return merger
-
-    # merger.write(output+id+".pdf")
-    output_tmp = "tmp_"+id+".pdf"
+    output_tmp = "tmp_"+ID+".pdf"
     merger.write(output_tmp)
     merger.close()
 
+    # Cleaning up temporary files
     os.remove(portrait_tmp)
     os.remove(ios_tmp)
     os.remove(handout_tmp)
@@ -187,39 +130,62 @@ def combine_pages(id):
     return output_tmp
 
 
-def combine_participants():
-    """ Combine the output from combine_pages() into one PDF.
-    """
+def shared_pages():
+    """ Label header for the per_testing_day_v2.pdf documents. """
 
-    first = combine_pages(id_1)
-    second = combine_pages(id_2)
+    header_couple()
+
+    header(per_day, couple_tmp, "ALL")
+
+    return couple_tmp
+
+
+def main():
+    """ Combine the output from combine_pages() into one PDF and add the shared pages. """
+
+    first = combine_pages(ID_1)
+    second = combine_pages(ID_2)
+    couple = shared_pages()
 
     both = PdfMerger()
     both.append(first)
     both.append(second)
+    both.append(couple)
 
     both.write(output)
 
     both.close()
 
+    print("Done! Created a pre-labelled PDF for "+ID_1+" and "+ID_2)
+    if day == "A1":
+        print("Their first testing day is on "+date)
+    elif day == "A3":
+        print("Their second testing day is on "+date)
+    print("The PDF is saved as "+output)
+
+    # Cleaning up temporary files
     os.remove(first)
     os.remove(second)
+    os.remove(couple)
 
 
-# header(per_participant, portrait_tmp, portrait_tmp, portrait)
-# header(per_participant, ios_tmp, ios_tmp, ios)
-# header(per_participant, handout_tmp, handout_tmp, handout)
+if __name__ == "__main__":
 
-# sort_pages()
+    # Check if all required files exist
+    try:
+        open(per_participant, encoding="utf-8")
+    except FileNotFoundError:
+        print("Error! Cannot find "+per_participant)
+        print("Add this file to the script directory and try again.")
+        sys.exit(1)
 
-combine_participants()
-#combine_pages(id_1)
-#combine_pages(id_2)
+    try:
+        open(per_day, encoding="utf-8")
+    except FileNotFoundError:
+        print("Error! Cannot find "+per_day)
+        print("Add this file to the script directory and try again.")
+        sys.exit(1)
 
-# header("print_per_participant_TD_v4.pdf", portrait_tmp, "portrait.pdf", portrait)
-# header("print_per_participant_TD_v4.pdf", "header_l.pdf", "ios.pdf", ios_pages)
-# header("print_per_participant_TD_v4.pdf", "handout.pdf", "final_handout.pdf", handout_page)
+    # Run the script to create a single PDF for printing
 
-# sort_pages()
-# clean_up()
-
+    main()
