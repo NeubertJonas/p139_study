@@ -25,8 +25,10 @@ from pypdf import PdfWriter, PdfReader, PdfMerger
 
 # Define variables
 
-id_1 = input("Enter the first participant ID (e.g., P13901):")
-id_2 = input("Enter the second participant ID (e.g., P13902):")
+id_1 = input("Enter the first participant ID: P139")
+id_1 = "P139"+id_1
+id_2 = input("Enter the second participant ID: P139")
+id_2 = "P139"+id_2
 
 day = ""
 while day != "1" and day != "2":
@@ -42,8 +44,8 @@ while day != "1" and day != "2":
         day = "A3"
         break
 
-date = input("Enter the date (e.g., 12.05.2023):")
-output = "labelled/print_"+id_1+"+"+id_2+"_"+day+".pdf"
+date = input("Enter the date (e.g., 19.04.1943): ")
+output = "print_"+id_1+"+"+id_2+"_"+day+".pdf"
 
 # Define page ranges
 # Enter page numbers for IOS and handout
@@ -115,9 +117,9 @@ def id_handout(id):
     pdf.drawString(90.5*mm, 245.3*mm, id[-2:])
     pdf.save()
 
-header_portrait(id_1)
-header_ios(id_1)
-id_handout(id_1)
+
+
+# TODO: Combine header_pdf and content_pdf
 
 def header(
     content_pdf: Path,
@@ -144,14 +146,19 @@ def header(
 
 
 
-def clean_up():
-    os.remove(portrait_tmp)
-    os.remove(ios_tmp)
-    os.remove(handout_tmp)
 
+def combine_pages(id):
+    """ Combine the output from header_ios(), header_portrait(), and id_handout() into one PDF.
+    """
 
+    header_portrait(id)
+    header_ios(id)
+    id_handout(id)
 
-def sort_pages():
+    header(per_participant, portrait_tmp, portrait_tmp, portrait)
+    header(per_participant, ios_tmp, ios_tmp, ios)
+    header(per_participant, handout_tmp, handout_tmp, handout)
+
     portrait_pdf = PdfReader(portrait_tmp)
     ios_pdf = PdfReader(ios_tmp)
     handout_pdf = PdfReader(handout_tmp)
@@ -164,30 +171,50 @@ def sort_pages():
         merger.merge(i, ios_pdf, pages=(p, p+1))
         p = p + 1
 
-
-
-    # merger.merge(2, pdf_2, pages=(0, 1))
-    # merger.merge(7, pdf_2, pages=(1, 2))
-    # merger.merge(17, pdf_2, pages=(2, 3))
-    # merger.merge(19, pdf_2, pages=(3, 4))
-    # merger.merge(26, pdf_2, pages=(4, 5))
-    # merger.merge(30, pdf_2, pages=(5, 6))
-    # merger.merge(33, pdf_2, pages=(6, 7))
-
     merger.append(handout_pdf)
 
-    merger.write(output)
+    # return merger
+
+    # merger.write(output+id+".pdf")
+    output_tmp = "tmp_"+id+".pdf"
+    merger.write(output_tmp)
     merger.close()
 
-    clean_up()
+    os.remove(portrait_tmp)
+    os.remove(ios_tmp)
+    os.remove(handout_tmp)
+
+    return output_tmp
 
 
-header(per_participant, portrait_tmp, portrait_tmp, portrait)
-header(per_participant, ios_tmp, ios_tmp, ios)
-header(per_participant, handout_tmp, handout_tmp, handout)
+def combine_participants():
+    """ Combine the output from combine_pages() into one PDF.
+    """
 
-sort_pages()
+    first = combine_pages(id_1)
+    second = combine_pages(id_2)
 
+    both = PdfMerger()
+    both.append(first)
+    both.append(second)
+
+    both.write(output)
+
+    both.close()
+
+    os.remove(first)
+    os.remove(second)
+
+
+# header(per_participant, portrait_tmp, portrait_tmp, portrait)
+# header(per_participant, ios_tmp, ios_tmp, ios)
+# header(per_participant, handout_tmp, handout_tmp, handout)
+
+# sort_pages()
+
+combine_participants()
+#combine_pages(id_1)
+#combine_pages(id_2)
 
 # header("print_per_participant_TD_v4.pdf", portrait_tmp, "portrait.pdf", portrait)
 # header("print_per_participant_TD_v4.pdf", "header_l.pdf", "ios.pdf", ios_pages)
