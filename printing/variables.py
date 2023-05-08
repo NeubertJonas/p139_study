@@ -15,6 +15,11 @@ ID_1 = "P139"+ID_1
 ID_2 = input("Enter the second participant ID: P139")
 ID_2 = "P139"+ID_2
 
+while ID_1 == ID_2:
+    print("Error! The participant IDs must be different.")
+    ID_2 = input("Enter the second participant ID: P139")
+    ID_2 = "P139"+ID_2
+
 day = ""
 while day != "1" and day != "2":
     day = input("First or second acute testing day? [1/2]: ")
@@ -30,6 +35,7 @@ while day != "1" and day != "2":
         break
 
 date = input("Enter the date (e.g., 19.04.1943): ")
+print("")
 output = "print_"+ID_1+"+"+ID_2+"_"+day+".pdf"
 
 

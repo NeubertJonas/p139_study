@@ -161,8 +161,9 @@ def main():
         print("Their first testing day is on "+date)
     elif day == "A3":
         print("Their second testing day is on "+date)
-    print("The PDF is saved as "+output)
-
+    print("\nThe PDF is saved as "+output+"\n")
+    print("NB: Please print it single-sided.\nIt contains everything you need for the testing days, except for the CRF and the labels for the blood samples.")
+    print("The order of the pages follows the schedule of the testing day.")
     # Cleaning up temporary files
     os.remove(first)
     os.remove(second)
@@ -186,6 +187,7 @@ if __name__ == "__main__":
         print("Add this file to the script directory and try again.")
         sys.exit(1)
 
+    print("Labelling all paper questionnaires now...\n")
     # Run the script to create a single PDF for printing
 
     main()
