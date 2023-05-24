@@ -58,16 +58,16 @@ Test data in Qualtrics are automatically skipped during data import, which inclu
 
 ## Overview
 
-| Name                                               | Baseline | SA @ lab | SA @ home |
-|-----------------------------------|:----------:|:----------:|:----------:|
-| [Couple Satisfaction Index (CSI-4)](#sec-csi)                  |    ✓     |      ✓      |      ✓      |
-| [Satisfaction with Life Scale (SWLS)](#sec-swls)               |    ✓     |      ✓      |      ✓      |
-| [Perceived Partner Responsiveness Scale (PPRS)](#sec-pprs)     |    ✓     |             |      ✓      |
-| [Interpersonal Reactivity Index for Couples (IRI-C)](#sec-iri) |    ✓     |             |      ✓      |
-| [Experiences in Close Relationships Scale (ECR-S)](#sec-ecr)   |    ✓     |             |      ✓      |
-| [Global Measure of Sexual Satisfaction (GMSEX)](#sec-gmsex)    |    ✓     |      ✓      |      ✓      |
-| [Female Sexual Function Index (FSFI)](#sec-fsfi)               |    ✓     |             |      ✓      |
-| [International Index of Erectile Function (IIEF)](#sec-iief)   |    ✓     |             |      ✓      |
+| Name                                                           | Baseline | SA \@ lab | SA \@ home |
+|------------------------------|:------------:|:------------:|:------------:|
+| [Couple Satisfaction Index (CSI-4)](#sec-csi)                  |    ✓     |     ✓     |     ✓      |
+| [Satisfaction with Life Scale (SWLS)](#sec-swls)               |    ✓     |     ✓     |     ✓      |
+| [Perceived Partner Responsiveness Scale (PPRS)](#sec-pprs)     |    ✓     |           |     ✓      |
+| [Interpersonal Reactivity Index for Couples (IRI-C)](#sec-iri) |    ✓     |           |     ✓      |
+| [Experiences in Close Relationships Scale (ECR-S)](#sec-ecr)   |    ✓     |           |     ✓      |
+| [Global Measure of Sexual Satisfaction (GMSEX)](#sec-gmsex)    |    ✓     |     ✓     |     ✓      |
+| [Female Sexual Function Index (FSFI)](#sec-fsfi)               |    ✓     |           |     ✓      |
+| [International Index of Erectile Function (IIEF)](#sec-iief)   |    ✓     |           |     ✓      |
 
 : Questionnaires and when they are recorded.
 
@@ -78,6 +78,7 @@ Please note that the above table does not contain all questionnaires recorded du
 # Couple Satisfaction Index (CSI-4) {#sec-csi}
 
 Definition
+
 :   A 4-item, psychometrically optimized, self-report scale assessing relationship satisfaction.
 
 The function `csi()` is applied to the raw data from Qualtrics to calculate the CSI-4:
@@ -92,9 +93,10 @@ csi <- \(dat) {
   dat <- dat |> mutate(CSI_4 = rowSums(x) - 4, .after = max(range)) # <3>
 }
 ```
-1. Look up where the CSI is located
-2. Save just those four items in a new tibble
-3. Calculate the sum and subtract 4 for the final score
+
+1.  Look up where the CSI is located
+2.  Save just those four items in a new tibble
+3.  Calculate the sum and subtract 4 for the final score
 
 ```{r}
 #| label: csi
@@ -138,6 +140,7 @@ ggplot(combination, aes(x = ID, y = SWLS, fill = Day)) +
 ```
 
 # Interpersonal Reactivity Index for Couples (IRI-C) {#sec-iri}
+
 ```{r}
 #| label: iri
 iri <- combination |>
@@ -215,7 +218,6 @@ ggplotly(p, tooltip = c("Subscale", "value"))
 
 ```
 
-
 ::: callout-note
 This is an interactive plot created via Plotly. You can hover your mouse over it to see individual values for subscales.
 :::
@@ -247,4 +249,3 @@ p <- ggplot(iief, aes(x = Day, y = value, fill = Subscale)) +
 
 ggplotly(p, tooltip = c("Subscale", "value"))
 ```
-
