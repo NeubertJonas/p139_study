@@ -23,7 +23,7 @@ conflicts_prefer(
 #
 # Download the data as comma separated values (csv) file from Qualtrics.
 # Select "Download all fields" and "Use numeric values" as options.
-# Download files anywhere the working directory. No need to rename them.
+# Download files into the data directory. No need to rename them.
 #
 # Script is designed for the following three Qualtrics surveys.
 # "TrainingDay_baseline" -> baseline
@@ -31,7 +31,7 @@ conflicts_prefer(
 # "At home questionnaire" -> home
 
 # Automatically detect the three files.
-files = list.files("data/", pattern = "[[:alnum:]]+.csv$", 
+files = list.files("_data/", pattern = "[[:alnum:]]+.csv$", 
                full.names = TRUE, recursive = TRUE)
 sources = c(
   baseline = files[grep("TrainingDay_Baseline", files, fixed = TRUE)],
@@ -449,9 +449,10 @@ iief <- \(dat) {
 
 # Combine all data in one tibble ------------------------------------------
 get_progress <- \() {
-#  import_data()
-#  calculate_metrics()
   
+  import_data()
+  calculate_metrics()
+
   baseline_2 <- get_overview(baseline[,1:2]) |> 
     mutate(Day = "Baseline", .after = ID)
   
@@ -484,6 +485,7 @@ get_progress <- \() {
 }
 
 get_combination <- \() {
+
   import_data()
   calculate_metrics()
   
@@ -508,26 +510,11 @@ get_combination <- \() {
     arrange(ID, Day)
   
 }
-import_data()
-calculate_metrics()
-combination = get_combination()
+
 # import_data()
 # calculate_metrics()
-# 
-# baseline_2 <- get_overview(baseline) |> 
-#   mutate(Day = "0", .after = ID)
-# 
-# 
-# follow_up_2 <- get_overview(follow_up) |> 
-#   mutate(Day = paste(Day, "_FU1"))
-# 
-# home_2 <- get_overview(home) |> 
-#   mutate(Day = paste(Day, "_FU2"))
-# 
-# combination <- bind_rows(baseline_2, follow_up_2, home_2)
-# 
-# 
-# rm(baseline_2, follow_up_2, home_2)
+combination = get_combination()
+
 
 # Run Script --------------------------------------------------------------
 
@@ -591,6 +578,17 @@ combination = get_combination()
 # Print overview for participants 1 and 2
 # print(filter(overview, ID == "P13901" | ID == "P13902"))
 
+# Export as csv file
 
-
-write_csv(combination, "relationship_metrics_01.06.23.csv")
+# write_csv(combination,
+#           paste0("_output/relationship_metrics_", Sys.Date(), ".csv"))
+# 
+# # (Optional: Export as Excel)
+# library(openxlsx)
+# 
+# write.xlsx(combination,
+#            file = paste0("_output/relationship_metrics_", Sys.Date(), ".xlsx"),
+#            colWidths = list(c(9, 12, rep(10, 25))),
+#            borders = "rows",
+#            borderColour = "grey"
+# )

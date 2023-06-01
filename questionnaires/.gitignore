@@ -1,6 +1,10 @@
 # Quarto Output
-relationship_metrics_files/
+/.quarto/
+/_output/relationship_metrics_files/
 *.html
 *.docx
 *.pdf
+
+# Raw Data and Output
 *.csv
+*.xlsx
