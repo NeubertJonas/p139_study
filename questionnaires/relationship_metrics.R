@@ -141,6 +141,9 @@ import_data <- \() {
       mutate(across(ID, as.character)) |>
       mutate(ID = if_else(str_starts(ID, "139"),
         paste0("P", ID), ID
+      )) |> 
+      mutate(ID = if_else(str_starts(ID, "p"),
+                          str_to_title(ID), ID
       ))
 
     assign(names(sources[i]), dat, pos = 1)
@@ -455,14 +458,14 @@ get_progress <- \() {
   
   follow_up_2 <- get_overview(follow_up[,1:2]) |>
     mutate(Day = case_when(
-      Day == "1" ~ "SA1_lab",
-      Day == "2" ~ "SA3_lab"
+      Day == "1" ~ "SA_2_lab",
+      Day == "2" ~ "SA_4_lab"
     )) 
 
   home_2 <- get_overview(home[,1:2]) |>
     mutate(Day = case_when(
-      Day == "1" ~ "SA1_home",
-      Day == "2" ~ "SA3_home"
+      Day == "1" ~ "SA_2_home",
+      Day == "2" ~ "SA_4_home"
     )) 
   
   
@@ -476,7 +479,7 @@ get_progress <- \() {
                   )
     )) |> 
     arrange(ID) |> 
-    relocate("SA1_home", .after = "SA1_lab")
+    relocate("SA_2_home", .after = "SA_2_lab")
   
 }
 
@@ -490,19 +493,19 @@ get_combination <- \() {
   
   follow_up_2 <- get_overview(follow_up[]) |>
     mutate(Day = case_when(
-      Day == "1" ~ "SA1_lab",
-      Day == "2" ~ "SA3_lab"
+      Day == "1" ~ "SA_2_lab",
+      Day == "2" ~ "SA_4_lab"
     )) 
   
   home_2 <- get_overview(home[]) |>
     mutate(Day = case_when(
-      Day == "1" ~ "SA1_home",
-      Day == "2" ~ "SA3_home"
+      Day == "1" ~ "SA_2_home",
+      Day == "2" ~ "SA_4_home"
     )) 
   
   
   combination <- bind_rows(baseline_2, follow_up_2, home_2) |> 
-    arrange(ID)
+    arrange(ID, Day)
   
 }
 import_data()
@@ -590,4 +593,4 @@ combination = get_combination()
 
 
 
-# write_csv(combination, "relationship_metrics_19.04.23.csv")
+write_csv(combination, "relationship_metrics_01.06.23.csv")
