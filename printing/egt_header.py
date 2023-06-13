@@ -10,6 +10,7 @@ from typing import Union, Literal, List
 
 from pypdf import PdfWriter, PdfReader, PdfMerger
 
+
 def add_EGT_header(
         egt_pdf: Path,
         egt_header: Path,
