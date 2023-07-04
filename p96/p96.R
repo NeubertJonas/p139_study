@@ -3,7 +3,7 @@
 # Study: P96
 # Task: Alternative Uses
 #
-# Rearrange data from an Excel sheet to simplify further analysis (e.g.,
+# Rearrange data from an Excel sheet to simplify further analysis
 # (e.g., semantic distance).
 #
 # Link to GitHub repository:
@@ -62,7 +62,7 @@ library(readxl)
 # Note: While readxl is part of the tidyverse,
 # it is not loaded by default when calling library(tidyverse)
 
-# Packages to extend the tidyverse and allow for Excel output
+# Packages to extend the tidyverse and allow for Excel output, respectively
 library(sjmisc, include.only = c("rotate_df", "remove_empty_cols"))
 library(openxlsx)
 
