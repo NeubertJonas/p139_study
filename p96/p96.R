@@ -41,7 +41,7 @@
 #     output Excel file, if important for further analysis.
 #
 # 3. Make sure the Excel file is in the data folder and referenced correctly in
-#     line 63.
+#     line 71.
 #     (Content of the data folder is ignored by Git, see .gitignore)
 #     (The data folder and this script have to be in the same location.)
 
