@@ -17,11 +17,11 @@ Rstudio and Visual Studio Code are available via package managers as well. For W
 Below you can find an overview of all folders and their contents.
 
 | Folder  | Description | Language |
-| ------------- | ------------- |
+| ------------- | ------------- | --- |
 | audio_video | Transcribe audio recordings and sync external audio with video recordings. | Python |
-| CFA  | Chain Free Association Task. Determine seed words and data preparation for semantic distance analysis. | R |
-| DAT  | Divergent Association Task.  Create matching seed words for two conditions. | R |
-| P96 | Rearrange data from study P96. Alternative Uses Task. | R |
+| cfa  | Chain Free Association Task. Determine seed words and data preparation for semantic distance analysis. | R |
+| dat  | Divergent Association Task.  Create matching seed words for two conditions. | R |
+| p96 | Rearrange data from study P96. Alternative Uses Task. | R |
 | printing | Automatically label all paper questionnaires for easier printing. | Python |
 | qualtrics | Prepare and analyse data from Qualtrics. Specifically, concerning relationship metrics. | R |
 
