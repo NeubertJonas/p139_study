@@ -1,9 +1,0 @@
-{
-    "python.terminal.activateEnvInCurrentTerminal": true,
-    "python.linting.pylintEnabled": true,
-    "python.linting.enabled": true,
-    "python.linting.lintOnSave": true,
-    "files.autoSave": "afterDelay",
-    "files.autoSaveDelay": 5000,
-    "editor.formatOnSave": true,
-}
