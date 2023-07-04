@@ -1,5 +1,5 @@
 # RStudio files
-.Rproj
+*.Rproj
 
 # Visual Studio Code files
 .vscode/
