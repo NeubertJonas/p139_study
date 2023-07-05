@@ -24,7 +24,7 @@ Afterwards, unzip the file in a new folder. Copy the two prepared PDF files (lis
 
 Open a terminal/command line: In Windows, right-click within the folder and "Open in Terminal". For Mac instructions, see [here](https://support.apple.com/en-gb/guide/terminal/trmlb20c7888/mac#:~:text=Open%20new%20Terminal%20windows%20or%20tabs%20from%20the%20Finder&text=Control-click%20the%20folder%20in,New%20Terminal%20Tab%20at%20Folder). The path in the terminal should now be the newly created folder in which you placed all the files.
 
-_The following instructions have not been tested on Mac OS yet (see [issue #3](https://github.com/NeubertJonas/p139_study/issues/3)_
+_The following instructions have not been tested on Mac OS yet (see [issue #3](https://github.com/NeubertJonas/p139_study/issues/3))_
 
 In the terminal, you can type `python -V` to check which version you have installed. We need a few more packages for Python for the code. You can either install them directly (meaning they will be available throughout your system) or create a virtual environment specifically for this project (I would recommend this to keep things seperate).
 
