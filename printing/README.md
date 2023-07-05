@@ -1,6 +1,8 @@
 # Label Print Questionnaires
 
-For every acute testing day, a collection of paper questionnaires needs to be printed, sorted, and labelled. Previously, this entailed finding the correct Word or PDF files for all tasks, checking how many copies were needed, and then printing all of them. Afterwards, the 74 pages had to be manually sorted and labelled with subject IDs, study day, date, and iteration of task. Rather tedious work, which this Python script can luckily eliminate. The script will produce a single PDF containing all 74 labelled pages in the correct order.
+For every acute testing day, a collection of paper questionnaires needs to be printed, sorted, and labelled. Previously, this entailed finding the correct Word or PDF files for all tasks, checking how many copies were needed, and then printing all of them. Afterwards, the 74 pages had to be manually sorted and labelled with subject IDs, study day, date, and iteration of task. Rather tedious work, which this Python script can luckily eliminate. The script will produce a single PDF containing all 74 labelled pages in the correct order. 
+
+The file should then be printed single-sided prior to the testing day together with two CRFs and the blood labels.
 
 ## Requirements
 
