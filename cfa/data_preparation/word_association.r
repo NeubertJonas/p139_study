@@ -1,7 +1,8 @@
 #### WORD ASSOCIATION TASK - Semantic Distance ####
 
 # Purpose: Prepare raw data from the Word Association Task
-# Author: Jonas Neubert (dev@jonaz.de)
+# Author: Jonas Neubert (jonas@neubert.eu)
+#
 # Generates four outcome variables:
 # 1. First response
 # 2. Last response
@@ -44,11 +45,11 @@ files <- tribble(
 # first_response.csv; last_response.csv; chain_response.csv
 # Those are ready to be upload to SemDis
 # In order to calculate semantic distances for
-# the first response, last response, and all neighboring words
+# the first response, last response, and all neighbouring words
 # http://semdis.wlu.psu.edu
 
 first_response()
-last = last_response()
+last_response()
 chain_response()
 
 # Bonus: The functions silently return tibbles containing the data

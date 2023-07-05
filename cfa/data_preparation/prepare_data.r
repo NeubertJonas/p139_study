@@ -23,12 +23,12 @@ check_files <- function() {
 # Some responses are not considered valid for the task.
 # This includes, among others, proper nouns such as Austria, Netflix, etc.
 # Words like these have to be manually identified before importing the data.
-# To do this please add a single dash (-) in front of the invalid response.
-# "Austria" changes to "-Austria".
+# To do this please add a single asterisk (*) in front of the invalid response.
+# "Austria" changes to "*Austria".
 # This way the R script can easily identify those words and assign a variable.
 # The variable "valid" is defined as 1=valid and 0=invalid
 # Later statistical analysis can then be run either with or without those words.
-# (The dash is automatically removed by the script)
+# (The asterisk is automatically removed by the script)
 
 check_validity <- function(data) {
   if (grepl("\\*", data[, "response"]) || grepl("\\*", data[, "item"])) {
