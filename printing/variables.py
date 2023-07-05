@@ -8,7 +8,7 @@ Changes to this file are required when the unlabeled reference PDFs have changed
 
 # Define reference PDFs which contain unlabelled headers
 
-per_participant = "print_per_participant_TD_v4.pdf"
+per_participant = "print_per_participant_v4.pdf"
 per_day = "print_per_testing_day_v2.pdf"
 
 # Check if all required files exist
@@ -78,11 +78,3 @@ portrait_tmp = "tmp_portrait.pdf"
 ios_tmp = "tmp_ios.pdf"
 handout_tmp = "tmp_handout.pdf"
 couple_tmp = "tmp_couple.pdf"
-<<<<<<< HEAD
-=======
-
-# Define reference PDFs which contain unlabelled headers
-
-per_participant = "print_per_participant_v4.pdf"
-per_day = "print_per_testing_day_v2.pdf"
->>>>>>> 15c89d407409b3de4d5320e451ef457b54577dfa
