@@ -6,6 +6,28 @@ Changes to this file are required when the unlabeled reference PDFs have changed
 # pylint: disable=C0103
 
 
+# Define reference PDFs which contain unlabelled headers
+
+per_participant = "print_per_participant_TD_v4.pdf"
+per_day = "print_per_testing_day_v2.pdf"
+
+# Check if all required files exist
+
+try:
+    open(per_participant, encoding="utf-8")
+except FileNotFoundError:
+    print("Error! Cannot find "+per_participant)
+    print("Add this file to the script directory and try again.")
+    sys.exit(1)
+
+try:
+    open(per_day, encoding="utf-8")
+except FileNotFoundError:
+    print("Error! Cannot find "+per_day)
+    print("Add this file to the script directory and try again.")
+    sys.exit(1)
+
+
 # Get user input for participant ID, day, and date
 
 ID_1 = input("Enter the first participant ID: P139")
@@ -56,8 +78,3 @@ portrait_tmp = "tmp_portrait.pdf"
 ios_tmp = "tmp_ios.pdf"
 handout_tmp = "tmp_handout.pdf"
 couple_tmp = "tmp_couple.pdf"
-
-# Define reference PDFs which contain unlabelled headers
-
-per_participant = "print_per_participant_TD_v4.pdf"
-per_day = "print_per_testing_day_v2.pdf"

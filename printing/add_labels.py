@@ -180,22 +180,7 @@ def clean_up():
 
 if __name__ == "__main__":
 
-    # Check if all required files exist
-    try:
-        open(per_participant, encoding="utf-8")
-    except FileNotFoundError:
-        print("Error! Cannot find "+per_participant)
-        print("Add this file to the script directory and try again.")
-        sys.exit(1)
-
-    try:
-        open(per_day, encoding="utf-8")
-    except FileNotFoundError:
-        print("Error! Cannot find "+per_day)
-        print("Add this file to the script directory and try again.")
-        sys.exit(1)
-
-    print("Labelling all paper questionnaires now...\n")
+    print("All good! Labelling paper questionnaires...\n")
 
     # Run the script to create a single PDF for printing
     main()
