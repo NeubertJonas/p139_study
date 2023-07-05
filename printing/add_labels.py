@@ -228,13 +228,12 @@ def main():
     final.write(output)
     final.close()
 
-    print("Done! Created a pre-labelled PDF for "+ID_1+" and "+ID_2)
+    print("Done! Created a labelled PDF for "+ID_1+" and "+ID_2+".")
     if day == "A1":
-        print("Their first testing day is on "+date)
+        print(date+" is their first acute test day.")
     elif day == "A3":
-        print("Their second testing day is on "+date)
-    print("\nThe PDF is saved as "+output+"\n")
-    print("NB: Please print it single-sided.")
+        print(date+" is their second acute test day.")
+    print("\nThe PDF is saved as: "+output+"\n")
 
 
 def clean_up():
