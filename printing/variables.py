@@ -59,5 +59,5 @@ couple_tmp = "tmp_couple.pdf"
 
 # Define reference PDFs which contain unlabelled headers
 
-per_participant = "print_per_participant_TD_v4.pdf"
+per_participant = "print_per_participant_v4.pdf"
 per_day = "print_per_testing_day_v2.pdf"
