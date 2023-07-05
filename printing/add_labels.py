@@ -5,9 +5,14 @@ for the acute testing day, with the exception of labels for blood samples and th
 
 When running the script for the first time,
 run "pip install -r requirements.txt" in the terminal to install dependencies.
+
+Author: Jonas Neubert (jonas@neubert.eu)
+Version: 1.0
+Last update: 05.07.2023
 """
 
 # Import packages -----------------------------------------------------
+
 import sys
 import os
 
