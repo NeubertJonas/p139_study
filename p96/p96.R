@@ -40,7 +40,7 @@
 #     when importing in R. Those would have to be added manually again to the
 #     output Excel file, if important for further analysis.
 #
-# 3. Make sure the Excel file is in the data folder and referenced correctly in
+# 3. Make sure the Excel file is in the _data folder and referenced correctly in
 #     line 71.
 #     (Content of the data folder is ignored by Git, see .gitignore)
 #     (The data folder and this script have to be in the same location.)
@@ -68,7 +68,7 @@ library(openxlsx)
 
 # Import Data -------------------------------------------------------------
 
-dat <- read_xlsx("data/P96_Alternative Uses_SilviaScoring_v2.xlsx",
+dat <- read_xlsx("_data/P96_Alternative Uses_SilviaScoring_v2.xlsx",
   .name_repair = "minimal",
   trim_ws = TRUE
 ) |>
@@ -143,8 +143,8 @@ output <- list(
 # Export to Excel ---------------------------------------------------------
 
 # Create folder if it is missing
-if (!dir.exists("output")) {
-  dir.create("output")
+if (!dir.exists("_output")) {
+  dir.create("_output")
 }
 
 # Optional styling for Excel
@@ -154,7 +154,7 @@ hs <- createStyle(
 )
 
 write.xlsx(output,
-  file = "output/P96_wide_v2.xlsx",
+  file = "_output/P96_wide_v2.xlsx",
   colWidths = "auto",
   headerStyle = hs,
   borders = "rows",

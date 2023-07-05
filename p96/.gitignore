@@ -4,5 +4,5 @@
 *.Rhistory
 
 # Research data
-data/
-output/
+*.xlsx
+*.csv
