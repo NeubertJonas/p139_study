@@ -1,7 +1,9 @@
 # Data Input
 
 From the Excel file with raw responses, export csv files, one per seed word.
-Follow this column scheme: Participant, Session, 1, 2, ..., n (responses)
+Follow this column naming scheme: 
+Participant, Session, 1, 2, ..., n (responses)
+
 Please make sure no additional columns/data are present.
 
 Name the csv files based on the seed word: snow.csv, candle.csv, etc.
