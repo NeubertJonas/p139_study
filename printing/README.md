@@ -28,13 +28,16 @@ _The following instructions have not been tested on Mac OS yet (see [issue #3](h
 
 In the terminal, you can type `python -V` to check which version you have installed. We need a few more packages for Python for the code. You can either install them directly (meaning they will be available throughout your system) or create a virtual environment specifically for this project (I would recommend this to keep things seperate).
 
-Setup new virtual environment
+Setup new virtual environment:
 `python -m venv --upgrade-deps .venv`
-Activate the virtual environment
+
+Activate the virtual environment:
 `.venv\Scripts\activate`
-Install required packages
+
+Install required packages:
 `pip install -r requirements.txt`
-Check list of installed packages (should contain Pillow, pypdf, and reportlab)
+
+Check list of installed packages (should contain Pillow, pypdf, and reportlab):
 `pip list`
 
 Congrats, now you're all set to execute the code and create some beautiful PDF files.
@@ -45,4 +48,5 @@ The code is controlled via command-line interface (CLI), so there is no need for
 First, make sure your terminal is in the correct folder and the virtual environment is activated (see above).
 
 Then, just run the following to execute the code: `python add_labels.py`
+
 You will be asked for subject IDs, study day, and date. The code will take care of the rest and create the PDF in the folder. Just repeat for the next acute testing day.
