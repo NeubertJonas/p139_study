@@ -33,6 +33,7 @@ The LexOPS dataset (containing 262.532 entries) was first narrowed down by only 
 Afterwards, the ratings for arousal, valence, and concreteness were used to identify three subsets based on the following criteria:
 
 | Subset | Criteria | Number of Words |
+| --- | --- | ---- |
 | Emotional | High in valence and arousal; Concreteness above average (to differentiate from abstract words) | 284 |
 | Abstract | Average valence and arousal; Low in concreteness (i.e., high in abstractness) | 60 |
 | Neutral | Average valence and arousal; Concreteness above average | 45 |
@@ -41,7 +42,8 @@ Finally, all items were sorted by word frequency (Zipf.SUBTLEX_UK) and two resea
 
 ## Results
 
-| Subset | Seeds |
+| Subset    | Seeds |
+| ------    | ---   |
 | Emotional | world, people, mother, father |
-| Abstract | mood, illusion, pride, time |
-| Neutral | taxi, jacket, boot, tower |
+| Abstract  | mood, illusion, pride, time |
+| Neutral   | taxi, jacket, boot, tower |
