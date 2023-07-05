@@ -4,12 +4,10 @@ The resulting PDF contains all pages, which need to be printed as preparation
 for the acute testing day, with the exception of labels for blood samples and the CRF.
 
 When running the script for the first time,
-run "pip install -r requirements.txt" in the terminal.
+run "pip install -r requirements.txt" in the terminal to install dependencies.
 """
 
-
-# Import packages
-
+# Import packages -----------------------------------------------------
 import sys
 import os
 
@@ -21,9 +19,82 @@ from reportlab.lib.units import mm
 from reportlab.lib.pagesizes import A4, landscape
 
 from pypdf import PdfWriter, PdfReader, PdfMerger
-from variables import *  # pylint: disable=W0401
 # pylint: disable=C0103
 
+# VARIABLES -------------------------------------------------------
+
+# Define reference PDFs which contain unlabelled headers
+# These files must be in the same directory as the script
+
+per_participant = "print_per_participant_v4.pdf"
+per_day = "print_per_testing_day_v2.pdf"
+
+# Check if reference PDFs exist
+try:
+    open(per_participant, encoding="utf-8")
+except FileNotFoundError:
+    print("Error! Cannot find "+per_participant)
+    print("Add this file to the script directory and try again.")
+    sys.exit(1)
+
+try:
+    open(per_day, encoding="utf-8")
+except FileNotFoundError:
+    print("Error! Cannot find "+per_day)
+    print("Add this file to the script directory and try again.")
+    sys.exit(1)
+
+
+# Get user input for participant ID, day, and date
+ID_1 = input("Enter the first participant ID: P139")
+ID_1 = "P139"+ID_1
+ID_2 = input("Enter the second participant ID: P139")
+ID_2 = "P139"+ID_2
+
+while ID_1 == ID_2:
+    print("Error! The participant IDs must be different.")
+    ID_2 = input("Enter the second participant ID: P139")
+    ID_2 = "P139"+ID_2
+
+day = ""
+while day != "1" and day != "2":
+    day = input("First or second acute testing day? [1/2]: ")
+
+    if day != "1" and day != "2":
+        print("Invalid input. Please enter 1 or 2.")
+
+    if day == "1":
+        day = "A1"
+        break
+
+    elif day == "2":
+        day = "A3"
+        break
+
+
+date = input("Enter the date (e.g., 19.04.1943): ")
+print("")
+output = "print_"+ID_1+"+"+ID_2+"_"+day+".pdf"
+
+
+# Define page ranges
+# Specifically for IOS and handout, the rest uses the default portrait header
+
+ios = [2, 7, 17, 19, 26, 30, 33]
+handout = [34]
+portrait = list(range(0, 35))
+portrait = [x for x in portrait if x not in ios and x not in handout]
+
+
+# Define temporary file names
+
+portrait_tmp = "tmp_portrait.pdf"
+ios_tmp = "tmp_ios.pdf"
+handout_tmp = "tmp_handout.pdf"
+couple_tmp = "tmp_couple.pdf"
+
+
+# FUNCTIONS -----------------------------------------------------------
 
 def header_portrait(ID):
     """Create a temp. PDF with the header for portrait pages."""
@@ -164,19 +235,18 @@ def main():
         print("Their second testing day is on "+date)
     print("\nThe PDF is saved as "+output+"\n")
     print("NB: Please print it single-sided.")
-    print("It contains everything you need for the testing days, except for the CRF and the labels for the blood samples.")
-    print("The order of the pages follows the schedule of the testing day.")
 
 
 def clean_up():
     """Delete temporary files from previous runs of the script."""
     files = [f for f in os.listdir('.')
          if os.path.isfile(f)]
-   
+ 
     for f in files:
         if f.startswith('tmp_') and f.endswith('.pdf'):
             os.remove(f)
 
+# Run this, when executed interactively ---------------------------------------
 
 if __name__ == "__main__":
 
@@ -184,5 +254,4 @@ if __name__ == "__main__":
 
     # Run the script to create a single PDF for printing
     main()
-
     clean_up()
