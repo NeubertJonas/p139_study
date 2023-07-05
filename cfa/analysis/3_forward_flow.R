@@ -30,7 +30,7 @@ export_forward_flow <- function() {
   # }
   # results = bind_rows(data)
 
-  write_csv(results, "forward_flow.csv")
+  write_csv(results, "_ouput/forward_flow.csv")
 
   invisible(results)
 }
@@ -38,8 +38,9 @@ export_forward_flow <- function() {
 calculate_ff <- function(seed, filename) {
   # Adjust data format for forward_flow()
   # Take care of duplicate entries with suffixes,
-  # rename columns, move IDs to row names, lowecase responses
+  # rename columns, move IDs to row names, lowercase responses
   # replace answers starting with "*" with NA.
+  
   raw_data <- read.csv(filename)
   raw_data[[1]] <- make.unique(as.character(raw_data[[1]]))
   raw_data <- raw_data %>%

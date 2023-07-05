@@ -15,9 +15,9 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # Load the other R files
 # This will likely include the installation of new packages
-source("prepare_data.r")
-source("chain_score.r")
-source("forward_flow.r")
+source("1_prepare_data.r")
+source("2_chain_score.r")
+source("3_forward_flow.r")
 
 # Export raw data as csv files, one per seed word.
 # Columns: Participant, Session, 1, 2, ..., n (responses)
@@ -31,19 +31,19 @@ source("forward_flow.r")
 # Correctly define seed words and file names below:
 files <- tribble(
   ~seed, ~filename,
-  "snow", "snow.csv",
-  "candle", "candle.csv",
-  "table", "table.csv",
-  "paper", "paper.csv",
-  "bear", "bear.csv",
-  "toaster", "toaster.csv"
+  "snow",    "_input/snow.csv",
+  "candle",  "_input/candle.csv",
+  "table",   "_input/table.csv",
+  "paper",   "_input/paper.csv",
+  "bear",    "_input/bear.csv",
+  "toaster", "_input/toaster.csv"
 )
 
 ##### PART 1: FIRST, LAST, and CHAIN RESPONSE #####
 
-# The three functions below output csv files to the directory.
+# The three functions below output csv files to the directory "_upload".
 # first_response.csv; last_response.csv; chain_response.csv
-# Those are ready to be upload to SemDis
+# Those are ready to be uploaded to SemDis
 # In order to calculate semantic distances for
 # the first response, last response, and all neighbouring words
 # http://semdis.wlu.psu.edu
@@ -68,7 +68,7 @@ chain_response()
 # Place the downloaded file in the same directory and
 # make sure the variable below correctly refers to it.
 
-filename <- "chain_responses_SemDis.csv"
+filename <- "_input/chain_responses_SemDis.csv"
 
 # Two variants are offered.
 # One uses all the data (exclude_invalid = FALSE)

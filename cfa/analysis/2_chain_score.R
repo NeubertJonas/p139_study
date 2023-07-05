@@ -38,17 +38,17 @@ chain_stats <- function(filename, exclude = TRUE) {
   
   data <- bind_rows(data_list)
   if (exclude) {
-    write_csv(data, "SemDis_chain_stats_ex.csv")
+    write_csv(data, "_output/SemDis_chain_stats_ex.csv")
     message(
       ex, " word pairs were excluded and ", rows,
       " word pairs were analysed."
     )
-    message("File created: SemDis_chain_stats_ex.csv")
+    message("File created: _output/SemDis_chain_stats_ex.csv")
     invisible(data)
   } else {
-    write_csv(data, "SemDis_chain_stats.csv")
+    write_csv(data, "_output/SemDis_chain_stats.csv")
     message(rows, " word pairs were analysed.")
-    message("File created: SemDis_chain_stats.csv")
+    message("File created: _output/SemDis_chain_stats.csv")
     invisible(data)
   }
 }

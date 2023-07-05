@@ -79,7 +79,7 @@ first_response <- function() {
   }
   data <- check_validity(data)
 
-  write_csv(data, "first_response.csv")
+  write_csv(data, "_upload/first_response.csv")
   message("File created: first_response.csv")
 
   invisible(data)
@@ -135,7 +135,7 @@ last_response <- function() {
   # If the last word is invalid, it is replaced by the next valid word
   # data <- check_validity(data)
 
-  write_csv(data, "last_response.csv")
+  write_csv(data, "_upload/last_response.csv")
   message("File created: last_response.csv")
 
   invisible(data)
@@ -230,7 +230,7 @@ chain_response <- function() {
   output <- bind_rows(master_list)
   output <- check_validity(output)
 
-  write_csv(output, "chain_response.csv")
+  write_csv(output, "_upload/chain_response.csv")
   message("File created: chain_response.csv")
 
   invisible(output)
