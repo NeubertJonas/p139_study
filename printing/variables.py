@@ -8,8 +8,6 @@ Changes to this file are required when the unlabeled reference PDFs have changed
 
 # Get user input for participant ID, day, and date
 
-
-
 ID_1 = input("Enter the first participant ID: P139")
 ID_1 = "P139"+ID_1
 ID_2 = input("Enter the second participant ID: P139")
@@ -19,6 +17,7 @@ while ID_1 == ID_2:
     print("Error! The participant IDs must be different.")
     ID_2 = input("Enter the second participant ID: P139")
     ID_2 = "P139"+ID_2
+
 
 day = ""
 while day != "1" and day != "2":
@@ -30,9 +29,11 @@ while day != "1" and day != "2":
     if day == "1":
         day = "A1"
         break
+
     elif day == "2":
         day = "A3"
         break
+
 
 date = input("Enter the date (e.g., 19.04.1943): ")
 print("")

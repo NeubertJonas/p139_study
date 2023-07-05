@@ -5,9 +5,7 @@ The old date will be crossed out with "#" and the new date will be added below.
 Insert the paper questionnaires into the printer in the exact order as they were printed before.
 (Otherwise, the text will not align because of the difference in landscape vs portrait mode)
 
-TODO: Clean up the code
-TODO: Adjust instructions (ID and day could be removed)
-
+NB: Currently not working, because the hashtags did not align reliably with the old date.
 """
 
 # When running the script for the first time,

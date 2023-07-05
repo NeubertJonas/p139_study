@@ -1,17 +1,18 @@
 """This script adds the participant ID, day, and date to the header of print questionnaires.
 
 The resulting PDF contains all pages, which need to be printed as preparation
-for the acute testing day, with the exception of labels for blood samples.
+for the acute testing day, with the exception of labels for blood samples and the CRF.
 
+When running the script for the first time,
+run "pip install -r requirements.txt" in the terminal.
 """
 
-# When running the script for the first time,
-# run "pip install -r requirements.txt" in the terminal.
 
 # Import packages
 
-import os
 import sys
+import os
+
 from pathlib import Path
 from typing import Union, Literal, List
 
@@ -20,17 +21,13 @@ from reportlab.lib.units import mm
 from reportlab.lib.pagesizes import A4, landscape
 
 from pypdf import PdfWriter, PdfReader, PdfMerger
-
 from variables import *  # pylint: disable=W0401
-
 # pylint: disable=C0103
 
-# Functions
-
-# Create header PDFs
 
 def header_portrait(ID):
-    """Create a PDF with the header for portrait pages."""
+    """Create a temp. PDF with the header for portrait pages."""
+
     pdf = canvas.Canvas(portrait_tmp, pagesize=A4)
     pdf.setFont("Courier-Bold", 12)
     pdf.drawString(46*mm, 279.5*mm, ID)
@@ -41,7 +38,8 @@ def header_portrait(ID):
 
 
 def header_ios(ID):
-    """Create a PDF with the header for landscape pages, namely the IOS."""
+    """Create a temp. PDF with the header for landscape pages, namely the IOS."""
+
     pdf = canvas.Canvas(ios_tmp, pagesize=landscape(A4))
     pdf.setFont("Courier-Bold", 12)
     pdf.drawString(87*mm, 196.5*mm, ID)
@@ -51,16 +49,9 @@ def header_ios(ID):
     pdf.save()
 
 
-def id_handout(ID):
-    """Create a PDF with the participant ID for the handout."""
-    pdf = canvas.Canvas(handout_tmp, pagesize=A4)
-    pdf.setFont("Courier-Bold", 26)
-    pdf.drawString(90.5*mm, 245.3*mm, ID[-2:])
-    pdf.save()
-
-
 def header_couple():
-    """Create a PDF with the header for portrait pages."""
+    """Create a temp. PDF with the header for portrait pages, but with two IDs."""
+
     pdf = canvas.Canvas(couple_tmp, pagesize=A4)
     pdf.setFont("Courier-Bold", 12)
     pdf.drawString(98*mm, 279.5*mm, day)
@@ -71,12 +62,21 @@ def header_couple():
     pdf.save()
 
 
+def id_handout(ID):
+    """Create a temp. PDF with the participant ID for the handout."""
+
+    pdf = canvas.Canvas(handout_tmp, pagesize=A4)
+    pdf.setFont("Courier-Bold", 26)
+    pdf.drawString(90.5*mm, 245.3*mm, ID[-2:])
+    pdf.save()
+
+
 def header(
     content_pdf: Path,
     header_pdf: Path,
     page_indices: Union[Literal["ALL"], List[int]] = "ALL",
 ):
-    """Label the header with subject ID, study day, and date. """
+    """Merge temporary PDFs with the paper questionnaires."""
     header_page = PdfReader(header_pdf).pages[0]
     writer = PdfWriter()
     reader = PdfReader(content_pdf)
@@ -94,11 +94,14 @@ def header(
 
 
 def combine_pages(ID):
-    """ Combine the output from header_ios(), header_portrait(), and id_handout() into one PDF. """
+    """ Combine the output from header_ios(), header_portrait(), and id_handout() into one PDF. 
+    This function creates the PDF for one participant, so it needs to be run twice
+    The output is saved as tmp_ID.pdf. This file is then merged with the output from the other participant"""
 
     header_portrait(ID)
     header_ios(ID)
     id_handout(ID)
+
 
     header(per_participant, portrait_tmp, portrait)
     header(per_participant, ios_tmp, ios)
@@ -111,6 +114,7 @@ def combine_pages(ID):
     merger = PdfMerger()
     merger.append(portrait_pdf)
 
+    # Place the IOS pages in the correct location
     p = 0
     for i in ios:
         merger.merge(i, ios_pdf, pages=(p, p+1))
@@ -131,30 +135,27 @@ def combine_pages(ID):
 
 
 def shared_pages():
-    """ Label header for the per_testing_day_v2.pdf documents. """
+    """ Label header for the per_testing_day_v2.pdf documents.
+    These are the paper questionnaire, which are shared between both participants
+    and contain both subject IDs"""
 
     header_couple()
-
     header(per_day, couple_tmp, "ALL")
 
     return couple_tmp
 
 
 def main():
-    """ Combine the output from combine_pages() into one PDF and add the shared pages. """
+    """ Combine the output from combine_pages() plus the shared pages into one final PDF. """
 
-    first = combine_pages(ID_1)
-    second = combine_pages(ID_2)
-    couple = shared_pages()
+    final = PdfMerger()
 
-    both = PdfMerger()
-    both.append(first)
-    both.append(second)
-    both.append(couple)
+    files = [combine_pages(ID_1), combine_pages(ID_2), shared_pages()]
+    for f in files:
+        final.append(f)
 
-    both.write(output)
-
-    both.close()
+    final.write(output)
+    final.close()
 
     print("Done! Created a pre-labelled PDF for "+ID_1+" and "+ID_2)
     if day == "A1":
@@ -162,12 +163,19 @@ def main():
     elif day == "A3":
         print("Their second testing day is on "+date)
     print("\nThe PDF is saved as "+output+"\n")
-    print("NB: Please print it single-sided.\nIt contains everything you need for the testing days, except for the CRF and the labels for the blood samples.")
+    print("NB: Please print it single-sided.")
+    print("It contains everything you need for the testing days, except for the CRF and the labels for the blood samples.")
     print("The order of the pages follows the schedule of the testing day.")
-    # Cleaning up temporary files
-    os.remove(first)
-    os.remove(second)
-    os.remove(couple)
+
+
+def clean_up():
+    """Delete temporary files from previous runs of the script."""
+    files = [f for f in os.listdir('.')
+         if os.path.isfile(f)]
+   
+    for f in files:
+        if f.startswith('tmp_') and f.endswith('.pdf'):
+            os.remove(f)
 
 
 if __name__ == "__main__":
@@ -188,6 +196,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     print("Labelling all paper questionnaires now...\n")
-    # Run the script to create a single PDF for printing
 
+    # Run the script to create a single PDF for printing
     main()
+
+    clean_up()

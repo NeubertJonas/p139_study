@@ -1,6 +1,4 @@
-""" Add standard header to the EGT PDF files exported from InDesign
-
-"""
+""" Add standard header to the EGT PDF files exported from InDesign"""
 
 # Import packages
 
