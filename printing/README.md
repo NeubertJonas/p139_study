@@ -15,7 +15,7 @@ The file should then be printed single-sided prior to the testing day together w
 
 ## Installing
 
-First, make sure you have Python installed on your system and added to your PATH environment. Easiest way to do this is via package managers. Instructions have been outlined [here](./README.md).
+First, make sure you have Python installed on your system and added to your PATH environment. Easiest way to do this is via package managers. Instructions have been outlined [here](../README.md).
 If you wish to make changes to the code, you can either fire up a regular text editor or work with an integrated development environment (IDE) such as Visual Studio Code. However, if you are just planning to execute the code to prepare PDFs for printing, then this is not necessary.
 
 Next, download the Python files from the repository. All you need is [add_labels.py](add_labels.py) and [requirements.txt](requirements.txt). If you open those files on GitHub, then you can find the download option in the menu with the three dots at the top-right.
