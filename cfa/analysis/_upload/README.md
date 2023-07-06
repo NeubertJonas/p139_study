@@ -1,5 +1,7 @@
 # CSV Files to be Uploaded
 
+**Contains example data based on responses by ChatGPT**
+
 This folder contains processed data, which can be uploaded to SemDis in order to calculate semantic distances for the first response, last response, and all neighouring words.
 
 Link: http://semdis.wlu.psu.edu
