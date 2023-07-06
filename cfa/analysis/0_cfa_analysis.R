@@ -94,7 +94,7 @@ chain_stats(filename, exclude = TRUE)
 # Define the semantic spaces you're interested in
 spaces <- c("baroni", "cbow", "cbow_ukwac", "en100", "glove", "tasa")
 
-# Creates a csv file ("forward_flow.csv"), which includes
+# Creates a csv file ("_output/forward_flow.csv"), which includes
 # the mean forward flow (per participant and seed word) and
 # its standard deviation
 

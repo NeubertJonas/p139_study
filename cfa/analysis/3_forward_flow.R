@@ -30,7 +30,7 @@ export_forward_flow <- function() {
   # }
   # results = bind_rows(data)
 
-  write_csv(results, "_ouput/forward_flow.csv")
+  write_csv(results, "_output/forward_flow.csv")
 
   invisible(results)
 }
