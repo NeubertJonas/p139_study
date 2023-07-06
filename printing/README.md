@@ -28,16 +28,36 @@ _The following instructions have not been tested on Mac OS yet (see [issue #3](h
 In the terminal, you can type `python -V` to check which version you have installed. We need a few more packages for Python for the code. You can either install them directly (meaning they will be available throughout your system) or create a virtual environment specifically for this project (I would recommend this to keep things seperate).
 
 Setup new virtual environment:
-`python -m venv --upgrade-deps .venv`
-
+```powershell
+python -m venv --upgrade-deps .venv
+```
 Activate the virtual environment:
-`.venv\Scripts\activate`
+```powershell
+.venv\Scripts\activate
+```
+<details>
+<summary>UnauthorizedAccess Error. What now?</summary>
+
+When you try to activate the virtual environment for the first time via PowerShell (Windows Terminal), you might encounter the following error: `.venv\Scripts\Activate.ps1 cannot be loaded because running
+scripts is disabled on this system...`
+
+This is a Windows security feature, which prevents running certain scripts. The default is very strict, so we will change it to something more permissable. Enter the following command in PowerShell:
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
+```
+You might have to restart PowerShell afterwards. 
+</details>
 
 Install required packages:
-`pip install -r requirements.txt`
+```powershell
+pip install -r requirements.txt
+```
 
 Check list of installed packages (should contain Pillow, pypdf, and reportlab):
-`pip list`
+```powershell
+pip list
+```
 
 Congrats, now you're all set to execute the code and create some beautiful PDF files.
 
@@ -46,6 +66,9 @@ Congrats, now you're all set to execute the code and create some beautiful PDF f
 The code is controlled via command-line interface (CLI), so there is no need for another software. Everything just takes place in the terminal we used earlier.
 First, make sure your terminal is in the correct folder and the virtual environment is activated (see above).
 
-Then, just run the following to execute the code: `python add_labels.py`
+Then, just run the following to execute the code: 
+```powershell
+python add_labels.py
+```
 
 You will be asked for subject IDs, study day, and date. The code will take care of the rest and create the PDF in the folder. Just repeat for the next acute testing day.
