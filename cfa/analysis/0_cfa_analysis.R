@@ -8,6 +8,10 @@
 # 2. Last response
 # 3. Chain score
 # 4. Forward flow
+#
+# This script is best used block-by-block, rather than everything at once.
+# Part 2 requires you to first run part 1, then upload files to SemDis,
+# and place the resulting file in in the _input folder. 
 
 ##### PREPARATION #####
 # Set RStudio working directory to file location
@@ -68,7 +72,7 @@ chain_response()
 # Place the downloaded file in the same directory and
 # make sure the variable below correctly refers to it.
 
-filename <- "_input/chain_responses_SemDis.csv"
+filename <- "_input/chain_response_SemDis.csv"
 
 # Two variants are offered.
 # One uses all the data (exclude_invalid = FALSE)
@@ -77,13 +81,21 @@ filename <- "_input/chain_responses_SemDis.csv"
 # Omitting the argument will run the default (exclude = TRUE)
 
 # You can also run both as filenames of generated csv files are not identical.
-# The suffix "_ex" identifies the output without the invalid words.
+# The suffix "_ex" identifies the output with invalid words excluded.
 
-chain_stats(filename, exclude = FALSE)
-chain_stats(filename, exclude = TRUE)
+if (file.exists(filename)) {
+  chain_stats(filename, exclude = FALSE)
+  chain_stats(filename, exclude = TRUE)
+} else {
+  message("Error!")
+  cat(filename, "is missing. \nSkipping chain scores.\n")
+  cat("Please make sure to upload '_upload/chain_response.csv' to SemDis.\n")
+  cat("Then save the resulting file as:", filename)
+}
 
 
-##### FORWARD FLOW #####
+
+##### PART 3: FORWARD FLOW #####
 # Calculate forward flow statistics for responses
 
 # Forward flow uses the same csv files defined in the files tibble above.
