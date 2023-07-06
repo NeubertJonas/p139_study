@@ -8,7 +8,7 @@ Code is mostly written in R or Python. For this, I have been using [RStudio](htt
 
 ### Optional: Installing via Package Manager
 
-If you are looking for an easy way to install R and Python, I recommend using [Chocolatey](https://chocolatey.org) for Windows or [Homebrew](https://brew.sh) for macOS. Both are package managers that allow you to install software from the command line. For example, to install R on Windows, you can simply run `choco install r.project` in the command line. For macOS, you can run `brew install r` to install R. The same applies to Python. For Windows, you can run `choco install python311` and for macOS, you can run `brew install python@3.11`. If you are using Linux, you can use your distribution's package manager to install R and Python.
+If you are looking for an easy way to install R and Python, I recommend using [Chocolatey](https://community.chocolatey.org) for Windows or [Homebrew](https://brew.sh) for macOS. Both are package managers that allow you to install software from the command line. For example, to install R on Windows, you can simply run `choco install r.project` in the command line. For macOS, you can run `brew install r` to install R. The same applies to Python. For Windows, you can run `choco install python311` and for macOS, you can run `brew install python@3.11`. If you are using Linux, you can use your distribution's package manager to install R and Python.
 
 Rstudio and Visual Studio Code are available via package managers as well. For Windows, you can run `choco install rstudio` and for macOS, you can run `brew install --cask rstudio`. For Visual Studio Code, you can run `choco install vscode` on Windows and `brew install --cask visual-studio-code` on macOS.
 
