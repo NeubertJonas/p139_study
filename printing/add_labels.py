@@ -178,7 +178,6 @@ def combine_pages(ID):
     header_ios(ID)
     id_handout(ID)
 
-
     header(per_participant, portrait_tmp, portrait)
     header(per_participant, ios_tmp, ios)
     header(per_participant, handout_tmp, handout)
@@ -244,13 +243,14 @@ def main():
 def clean_up():
     """Delete temporary files from previous runs of the script."""
     files = [f for f in os.listdir('.')
-         if os.path.isfile(f)]
- 
+             if os.path.isfile(f)]
+
     for f in files:
         if f.startswith('tmp_') and f.endswith('.pdf'):
             os.remove(f)
 
 # Run this, when executed interactively ---------------------------------------
+
 
 if __name__ == "__main__":
 
