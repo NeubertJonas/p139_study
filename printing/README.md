@@ -76,4 +76,10 @@ Finally, it is a good habit to deactive the virtual environment you have been wo
 deactivate
 ```
 
+
+TODO:
+
+- Better instructions on how to download
+- Fix issue with .venv not finding reportlab (wrong Python installation, maybe)
+
 You will be asked for subject IDs, study day, and date. The code will take care of the rest and create the PDF in the folder. Just repeat for the next acute testing day.
