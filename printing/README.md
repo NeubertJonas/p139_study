@@ -41,7 +41,7 @@ Activate the virtual environment:
 When you try to activate the virtual environment for the first time via PowerShell (Windows Terminal), you might encounter the following error: `.venv\Scripts\Activate.ps1 cannot be loaded because running
 scripts is disabled on this system...`
 
-This is a Windows security feature, which prevents running certain scripts. The default is very strict, so we will change it to something more permissable. Enter the following command in PowerShell:
+This is a Windows security feature, which prevents running certain scripts. The default is very strict, so we will change it to something more permissable. Open an elevated PowerShell prompt (click the Windows button and search for "powershell" and then right-click to "run as administrator"). Execute the following command:
 
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
