@@ -7,7 +7,7 @@
 #
 # Load Packages -----------------------------------------------------------
 
-# Set working directory to current file location
+# Set working directory to current file location (or use RStudio UI)
 # setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 library(conflicted)
@@ -371,7 +371,7 @@ fsfi <- \(dat) {
       ~ abs(. - 6)
     )) |>
     mutate(across(
-      c(3:7, 9, 11, 13, 14, 15),
+      c(3:7, 9, 11, 13, 14),
       # Reverse and recode "no sex. activity" as 0
       # 1:6 --> 0, 5:1
       \(.) case_when(
@@ -459,14 +459,14 @@ get_progress <- \() {
   
   follow_up_2 <- get_overview(follow_up[,1:2]) |>
     mutate(Day = case_when(
-      Day == "1" ~ "SA_2_lab",
-      Day == "2" ~ "SA_4_lab"
+      Day == "1" ~ "SA_2a_lab",
+      Day == "2" ~ "SA_4a_lab"
     )) 
 
   home_2 <- get_overview(home[,1:2]) |>
     mutate(Day = case_when(
-      Day == "1" ~ "SA_2_home",
-      Day == "2" ~ "SA_4_home"
+      Day == "1" ~ "SA_2b_home",
+      Day == "2" ~ "SA_4b_home"
     )) 
   
   
@@ -480,7 +480,7 @@ get_progress <- \() {
                   )
     )) |> 
     arrange(ID) |> 
-    relocate("SA_2_home", .after = "SA_2_lab")
+    relocate("SA_2b_home", .after = "SA_2a_lab")
   
 }
 
@@ -495,14 +495,14 @@ get_combination <- \() {
   
   follow_up_2 <- get_overview(follow_up[]) |>
     mutate(Day = case_when(
-      Day == "1" ~ "SA_2_lab",
-      Day == "2" ~ "SA_4_lab"
+      Day == "1" ~ "SA_2a_lab",
+      Day == "2" ~ "SA_4a_lab"
     )) 
   
   home_2 <- get_overview(home[]) |>
     mutate(Day = case_when(
-      Day == "1" ~ "SA_2_home",
-      Day == "2" ~ "SA_4_home"
+      Day == "1" ~ "SA_2b_home",
+      Day == "2" ~ "SA_4b_home"
     )) 
   
   
