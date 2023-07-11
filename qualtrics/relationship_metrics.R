@@ -371,7 +371,7 @@ fsfi <- \(dat) {
       ~ abs(. - 6)
     )) |>
     mutate(across(
-      c(3:7, 9, 11, 13, 15),
+      c(3:7, 9, 11, 13, 14, 15),
       # Reverse and recode "no sex. activity" as 0
       # 1:6 --> 0, 5:1
       \(.) case_when(
