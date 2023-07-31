@@ -156,8 +156,13 @@ import_data <- \() {
   rm(ds, pos = 1)
 }
 
+
+# Calculate Metrics -------------------------------------------------------
 # Go through all questionnaires and calculate their scores.
+
 calculate_metrics <- \() {
+  import_data()
+  
   for (i in seq_along(sources)) {
     assign("ds", names(sources[i]), pos = 1)
     dat <- get(ds) |>
@@ -201,45 +206,6 @@ get_range <- \(dat, name) {
     
   y <- x + get_count(name) - 1
   c(x:y)
-}
-
-get_results <- \(dat, test, participant = "all", subscales = TRUE) {
-  if (participant[1] == "all") participant = unique(dat[["ID"]])
-  
-  if (subscales) {
-    dat |> filter(ID == participant) |> 
-      select(ID | starts_with(test))
-  } else {
-    dat |> filter(ID == participant) |> 
-      select(ID | eval(test))
-  }
-}
-
-get_overview <- \(dat, basic = FALSE) {
-  if (!basic) {
-    dat |> select(!starts_with("Q"))
-  } else {
-    dat |>
-      select(!starts_with("Q")) |>
-      select(!ends_with(c(
-        "_V",
-        "_U",
-        "_AV",
-        "_AN",
-        "_PT",
-        "_EC",
-        "_D",
-        "_A",
-        "_L",
-        "_O",
-        "_S",
-        "_P",
-        "_E",
-        "_OF",
-        "_I",
-        "_OS"
-      )))
-  }
 }
 
 
@@ -452,46 +418,37 @@ iief <- \(dat) {
   dat |> add_column(iief, .after = max(range))
 }
 
-# Combine all data in one tibble ------------------------------------------
-get_progress <- \() {
-  
-  import_data()
-  calculate_metrics()
-
-  baseline_2 <- get_overview(baseline[,1:2]) |> 
-    mutate(Day = "Baseline", .after = ID)
-  
-  
-  follow_up_2 <- get_overview(follow_up[,1:2]) |>
-    mutate(Day = case_when(
-      Day == "1" ~ "SA_2a_lab",
-      Day == "2" ~ "SA_4a_lab"
-    )) 
-
-  home_2 <- get_overview(home[,1:2]) |>
-    mutate(Day = case_when(
-      Day == "1" ~ "SA_2b_home",
-      Day == "2" ~ "SA_4b_home"
-    )) 
-  
-  
-  progress <- bind_rows(baseline_2, follow_up_2, home_2) |> 
-    pivot_wider(names_from = Day, values_from = Day,
-                values_fill = "No") |> 
-    mutate(across(2:6,
-                  \(.) case_when(
-                    . == "No" ~ "",
-                    .default = "✓"
-                  )
-    )) |> 
-    arrange(ID) |> 
-    relocate("SA_2b_home", .after = "SA_2a_lab")
-  
+get_overview <- \(dat, basic = FALSE) {
+  if (!basic) {
+    dat |> select(!starts_with("Q"))
+  } else {
+    dat |>
+      select(!starts_with("Q")) |>
+      select(!ends_with(c(
+        "_V",
+        "_U",
+        "_AV",
+        "_AN",
+        "_PT",
+        "_EC",
+        "_D",
+        "_A",
+        "_L",
+        "_O",
+        "_S",
+        "_P",
+        "_E",
+        "_OF",
+        "_I",
+        "_OS"
+      )))
+  }
 }
 
-get_combination <- \() {
+# Combine Results ---------------------------------------------------------
 
-  import_data()
+get_results <- \() {
+
   calculate_metrics()
   
   baseline_2 <- get_overview(baseline[]) |> 
@@ -518,10 +475,67 @@ get_combination <- \() {
 
 # import_data()
 # calculate_metrics()
-combination = get_combination()
+results = get_results()
+
+write_csv(results,
+          paste0("_output/relationship_metrics_", Sys.Date(), ".csv"))
 
 
-# Run Script --------------------------------------------------------------
+
+# Bonus Functions -----------------------------------------------
+# Some optional functions for extracting specific parts of the data.
+
+get_results <- \(dat, test, participant = "all", subscales = TRUE) {
+  if (participant[1] == "all") participant = unique(dat[["ID"]])
+  
+  if (subscales) {
+    dat |> filter(ID == participant) |> 
+      select(ID | starts_with(test))
+  } else {
+    dat |> filter(ID == participant) |> 
+      select(ID | eval(test))
+  }
+}
+
+
+
+get_progress <- \() {
+  
+  import_data()
+  calculate_metrics()
+  
+  baseline_2 <- get_overview(baseline[,1:2]) |> 
+    mutate(Day = "Baseline", .after = ID)
+  
+  
+  follow_up_2 <- get_overview(follow_up[,1:2]) |>
+    mutate(Day = case_when(
+      Day == "1" ~ "SA_2a_lab",
+      Day == "2" ~ "SA_4a_lab"
+    )) 
+  
+  home_2 <- get_overview(home[,1:2]) |>
+    mutate(Day = case_when(
+      Day == "1" ~ "SA_2b_home",
+      Day == "2" ~ "SA_4b_home"
+    )) 
+  
+  
+  progress <- bind_rows(baseline_2, follow_up_2, home_2) |> 
+    pivot_wider(names_from = Day, values_from = Day,
+                values_fill = "No") |> 
+    mutate(across(2:6,
+                  \(.) case_when(
+                    . == "No" ~ "",
+                    .default = "✓"
+                  )
+    )) |> 
+    arrange(ID) |> 
+    relocate("SA_2b_home", .after = "SA_2a_lab")
+  
+}
+
+# Further Documentation ---------------------------------------------------
 
 # First, import the data:
 
