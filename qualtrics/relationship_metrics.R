@@ -8,14 +8,13 @@
 # Load Packages -----------------------------------------------------------
 
 # Set working directory to current file location (or use RStudio UI)
-# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 library(conflicted)
 library(tidyverse)
 
 conflicts_prefer(
-  dplyr::filter,
-  dplyr::lag
+  dplyr::filter
 )
 
 
@@ -24,6 +23,8 @@ conflicts_prefer(
 # Download the data as comma separated values (csv) file from Qualtrics.
 # Select "Download all fields" and "Use numeric values" as options.
 # Download files into the data directory. No need to rename them.
+# Make sure there is only one file each for 
+# Baseline, Follow-Up, and At Home questionnaires.
 #
 # Script is designed for the following three Qualtrics surveys.
 # "TrainingDay_baseline" -> baseline
@@ -38,6 +39,10 @@ sources = c(
   follow_up = files[grep("Follow+up", files, fixed = TRUE)],
   home = files[grep("At+home+questionnaire", files, fixed = TRUE)]
   )
+
+if (length(sources) > 3) {
+  stop("Too many csv files. Make sure there is only one file each for Baseline, Follow-Up, and At Home questionnaires.")
+}
 rm(files)
 
 # Alternatively, define files manually like so:
@@ -151,7 +156,7 @@ import_data <- \() {
   rm(ds, pos = 1)
 }
 
-
+# Go through all questionnaires and calculate their scores.
 calculate_metrics <- \() {
   for (i in seq_along(sources)) {
     assign("ds", names(sources[i]), pos = 1)
