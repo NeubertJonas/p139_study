@@ -34,8 +34,19 @@ The basis for this document was a template inspired by the Tufte handout style [
 #| label: load-packages
 #| include: false
 
-source("relationship_metrics.R")
+source("../relationship_metrics.R")
+
+files = list.files("../_data/", pattern = "[[:alnum:]]+.csv$", 
+               full.names = TRUE, recursive = TRUE)
+sources = c(
+  baseline = files[grep("TrainingDay_Baseline", files, fixed = TRUE)],
+  follow_up = files[grep("Follow+up", files, fixed = TRUE)],
+  home = files[grep("At+home+questionnaire", files, fixed = TRUE)]
+  )
+
 n = sort(unique(get_progress()$ID))
+
+combination <- get_combination()
 ```
 
 First, the raw data needs to be downloaded as csv files for three Qualtrics questionnaires: TrainingDay_Baseline, Follow-Up, and At Home Questionnaire. When downloading, make sure to select *numeric choice* rather than *choice text*. There is no need to rename the files, but they need to be placed in the *data* folder. At the time of writing (partial) data for the following participants is available: `r n`.

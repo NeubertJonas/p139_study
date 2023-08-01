@@ -8,14 +8,17 @@
 # Load Packages -----------------------------------------------------------
 
 # Set working directory to current file location (or use RStudio UI)
+if (inherits(try(find.package("rstudioapi"), silent = TRUE), "try-error")) {
+  install.packages("rstudioapi")
+}
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
-library(conflicted)
-library(tidyverse)
 
-conflicts_prefer(
-  dplyr::filter
-)
+if (!require(conflicted)) install.packages("conflicted")
+if (!require(tidyverse)) install.packages("tidyverse")
+
+
+conflicts_prefer(dplyr::filter, .quiet = TRUE)
 
 
 # Data Sources -------------------------------------------------------------
@@ -25,6 +28,11 @@ conflicts_prefer(
 # Download files into the data directory. No need to rename them.
 # Make sure there is only one file each for 
 # Baseline, Follow-Up, and At Home questionnaires.
+#
+# Additionally, check on Qualtrics whether participant IDs were entered
+# in the correct format, otherwise import might fail.
+# Correct: P13901, p13901, 13901 (should always start with "P139")
+# Incorrect: 01, 1, 3901, etc.
 #
 # Script is designed for the following three Qualtrics surveys.
 # "TrainingDay_baseline" -> baseline
@@ -156,8 +164,13 @@ import_data <- \() {
   rm(ds, pos = 1)
 }
 
+
+# Calculate Metrics -------------------------------------------------------
 # Go through all questionnaires and calculate their scores.
+
 calculate_metrics <- \() {
+  import_data()
+  
   for (i in seq_along(sources)) {
     assign("ds", names(sources[i]), pos = 1)
     dat <- get(ds) |>
@@ -174,6 +187,67 @@ calculate_metrics <- \() {
   rm(ds, pos = 1)
 }
 
+
+# Extract Only the Scores for (Sub-)scales --------------------------------
+# Removes the raw item responses.
+# If basic = TRUE, then subscales are omitted.
+# E.g., get_overview(home, basic = TRUE)
+get_overview <- \(dat, basic = FALSE) {
+  if (!basic) {
+    dat |> select(!starts_with("Q"))
+  } else {
+    dat |>
+      select(!starts_with("Q")) |>
+      select(!ends_with(c(
+        "_V",
+        "_U",
+        "_AV",
+        "_AN",
+        "_PT",
+        "_EC",
+        "_D",
+        "_A",
+        "_L",
+        "_O",
+        "_S",
+        "_P",
+        "_E",
+        "_OF",
+        "_I",
+        "_OS"
+      )))
+  }
+}
+
+# Combine Results from all Days -------------------------------------------
+
+get_results <- \() {
+  
+  calculate_metrics()
+  
+  baseline <<- get_overview(baseline[]) |> 
+    mutate(Day = "Baseline", .after = ID)
+  
+  # Letters "a" and "b" added to the variable name to ensure
+  # chronological order of days.
+  
+  follow_up <<- get_overview(follow_up[]) |>
+    mutate(Day = case_when(
+      Day == "1" ~ "SA_2a_lab",
+      Day == "2" ~ "SA_4a_lab"
+    )) 
+  
+  home <<- get_overview(home[]) |>
+    mutate(Day = case_when(
+      Day == "1" ~ "SA_2b_home",
+      Day == "2" ~ "SA_4b_home"
+    )) 
+  
+  
+  combination <- bind_rows(baseline, follow_up, home) |> 
+    arrange(ID, Day)
+  
+}
 
 # Generic Helper Functions ------------------------------------------------
 
@@ -201,45 +275,6 @@ get_range <- \(dat, name) {
     
   y <- x + get_count(name) - 1
   c(x:y)
-}
-
-get_results <- \(dat, test, participant = "all", subscales = TRUE) {
-  if (participant[1] == "all") participant = unique(dat[["ID"]])
-  
-  if (subscales) {
-    dat |> filter(ID == participant) |> 
-      select(ID | starts_with(test))
-  } else {
-    dat |> filter(ID == participant) |> 
-      select(ID | eval(test))
-  }
-}
-
-get_overview <- \(dat, basic = FALSE) {
-  if (!basic) {
-    dat |> select(!starts_with("Q"))
-  } else {
-    dat |>
-      select(!starts_with("Q")) |>
-      select(!ends_with(c(
-        "_V",
-        "_U",
-        "_AV",
-        "_AN",
-        "_PT",
-        "_EC",
-        "_D",
-        "_A",
-        "_L",
-        "_O",
-        "_S",
-        "_P",
-        "_E",
-        "_OF",
-        "_I",
-        "_OS"
-      )))
-  }
 }
 
 
@@ -452,30 +487,43 @@ iief <- \(dat) {
   dat |> add_column(iief, .after = max(range))
 }
 
-# Combine all data in one tibble ------------------------------------------
+
+
+# Output Results ---------------------------------------------------------
+
+results = get_results()
+
+# Export as .csv file
+write_csv(results,
+          paste0("_output/relationship_metrics_", Sys.Date(), ".csv"))
+
+# (Optional: Export as Excel)
+# library(openxlsx)
+# 
+# write.xlsx(results,
+#            file = paste0("_output/relationship_metrics_", Sys.Date(), ".xlsx"),
+#            colWidths = list(c(9, 12, rep(10, 25))),
+#            borders = "rows",
+#            borderColour = "grey"
+# )
+
+
+# Bonus Functions -----------------------------------------------
+# Some optional functions for showing extracting specific parts of the data.
+
+# Progress report: Who has completed which day?
 get_progress <- \() {
   
-  import_data()
-  calculate_metrics()
-
-  baseline_2 <- get_overview(baseline[,1:2]) |> 
-    mutate(Day = "Baseline", .after = ID)
+  if (!exists("baseline") | !exists("follow_up") | !exists("home")) {
+    get_results()
+  }
+  
+  baseline_tmp <- get_overview(baseline[,1:2])
+  follow_up_tmp <- get_overview(follow_up[,1:2]) 
+  home_tmp <- get_overview(home[,1:2])
   
   
-  follow_up_2 <- get_overview(follow_up[,1:2]) |>
-    mutate(Day = case_when(
-      Day == "1" ~ "SA_2a_lab",
-      Day == "2" ~ "SA_4a_lab"
-    )) 
-
-  home_2 <- get_overview(home[,1:2]) |>
-    mutate(Day = case_when(
-      Day == "1" ~ "SA_2b_home",
-      Day == "2" ~ "SA_4b_home"
-    )) 
-  
-  
-  progress <- bind_rows(baseline_2, follow_up_2, home_2) |> 
+  progress <- bind_rows(baseline_tmp, follow_up_tmp, home_tmp) |> 
     pivot_wider(names_from = Day, values_from = Day,
                 values_fill = "No") |> 
     mutate(across(2:6,
@@ -489,111 +537,35 @@ get_progress <- \() {
   
 }
 
-get_combination <- \() {
+# Uncomment to print progress report
+# print(get_progress())
 
-  import_data()
-  calculate_metrics()
+# filter_results(...) provides results for a specific test.
+# It can also extract results for specific participants.
+filter_results <- \(dat, test, participant = "all", subscales = TRUE) {
+  if (participant[1] == "all") participant = unique(dat[["ID"]])
   
-  baseline_2 <- get_overview(baseline[]) |> 
-    mutate(Day = "Baseline", .after = ID)
-  
-  
-  follow_up_2 <- get_overview(follow_up[]) |>
-    mutate(Day = case_when(
-      Day == "1" ~ "SA_2a_lab",
-      Day == "2" ~ "SA_4a_lab"
-    )) 
-  
-  home_2 <- get_overview(home[]) |>
-    mutate(Day = case_when(
-      Day == "1" ~ "SA_2b_home",
-      Day == "2" ~ "SA_4b_home"
-    )) 
-  
-  
-  combination <- bind_rows(baseline_2, follow_up_2, home_2) |> 
-    arrange(ID, Day)
-  
+  if (subscales) {
+    dat |> filter(ID == participant) |> 
+      select(ID | starts_with(test))
+  } else {
+    dat |> filter(ID == participant) |> 
+      select(ID | eval(test))
+  }
 }
 
-# import_data()
-# calculate_metrics()
-combination = get_combination()
-
-
-# Run Script --------------------------------------------------------------
-
-# First, import the data:
-
-# import_data()
-
-# You know have the raw data for baseline and follow_up questionnaires
-# in the R environment as tibbles (special data tables from the tidyverse).
-
-# Second, calculate all questionnaire scores and add them to those tibbles
-
-# calculate_metrics()
-
-# The function goes through all scales and extracts their associated items.
-# Then necessary calculations are performed. Mainly reverse coding or changing
-# the range of responses from 1:6 to 0:5 for example. 
-# Then subscales and final scores are calculated. The results are added back
-# to the main tibbles in separate columns.
-
-# Extracting Data Easily
-
-# I provide two more functions to easily access the results. I added examples
-# how to use them below.
-
-# get_results() provides results for a specific test.
-# get_results(baseline, "PPRS_12")
+# Usage Examples:
+# PPRS_12 only from baseline:
+# filter_results(baseline, "PPRS_12")
 
 # If you're only interested in one participant:
-# get_results(baseline, "PPRS_12", "P13901")
+# filter_results(baseline, "PPRS_12", "P13901")
 
 # Two or more participants:
-# get_results(baseline, "IRI_C", c("P13901", "P13902"))
+# filter_results(baseline, "IRI_C", c("P13901", "P13902"))
 
 # Without the subscales:
-# get_results(baseline, "IRI_C", c("P13901", "P13902"), subscales = FALSE)
+# filter_results(baseline, "IRI_C", c("P13901", "P13902"), subscales = FALSE)
 
 # Two or more tests:
-# get_results(home, c("SWLS", "CSI_4", "ECR_S"))
-
-
-# Use get_overview() to see all calculated scores at once.
-
-# baseline_o <- get_overview(baseline)
-# follow_up_o <- get_overview(follow_up)
-# home_o <- get_overview(home)
-
-# Exclude subscales
-
-# get_overview(baseline, basic = TRUE)
-# get_overview(follow_up, basic = TRUE)
-
-# Those two functions return a tibble, which can be saved and then used
-# for further analysis.
-
-# overview <- get_overview(baseline, basic = TRUE)
-
-# Print overview
-# print(overview)
-
-# Print overview for participants 1 and 2
-# print(filter(overview, ID == "P13901" | ID == "P13902"))
-
-# Export as csv file
-
-# write_csv(combination,
-#           paste0("_output/relationship_metrics_", Sys.Date(), ".csv"))
-# 
-# # (Optional: Export as Excel)
-# library(openxlsx)
-# 
-# write.xlsx(combination,
-#            file = paste0("_output/relationship_metrics_", Sys.Date(), ".xlsx"),
-#            colWidths = list(c(9, 12, rep(10, 25))),
-#            borders = "rows",
-#            borderColour = "grey"
-# )
+# filter_results(home, c("SWLS", "CSI_4", "ECR_S"))
