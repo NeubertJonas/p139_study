@@ -1,8 +1,8 @@
 # Working with Audio & Video Files
 
-*The detailed instructions below are out-of-date, but remain here for historical purposes. I originally planned to utilize Praat to automatically sync the separately recorded audio and video files, but this has been proven too unreliable (e.g., when the start time was more than 30 seconds apart). Instead, I synced the files manually via Adobe Premiere Pro, which also includes great filters to further enhance the audio quality for better clarity.
+**The detailed instructions below are out-of-date, but remain here for historical purposes. I originally planned to utilize Praat to automatically sync the separately recorded audio and video files, but this has been proven too unreliable (e.g., when the start time was more than 30 seconds apart). Instead, I synced the files manually via Adobe Premiere Pro, which also includes great filters to further enhance the audio quality for better clarity.**
 
-Concerning transcription, I initially used [OpenAI's Whisper](https://github.com/openai/whisper) package, but then moved on to the [WhisperX](https://github.com/m-bain/whisperX) package because it is faster, more accurate, does not suffer from timestamp drift, and includes speaker labels. WhisperX is still very much experimental and, thus, more complicated to install for the less tech-savvy. It also requires one to have a (somewhat) recent nVidia graphics card.*
+**Concerning transcription, I initially used [OpenAI's Whisper](https://github.com/openai/whisper) package, but then moved on to the [WhisperX](https://github.com/m-bain/whisperX) package because it is faster, more accurate, does not suffer from timestamp drift, and includes speaker labels. WhisperX is still very much experimental and, thus, more complicated to install for the less tech-savvy. It also requires one to have a (somewhat) recent nVidia graphics card.**
 
 If you still wanna give it a try, I recommend having a look at its GitHub repo. For reference, I used the following parameter for transcribing:
 
