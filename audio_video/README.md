@@ -4,7 +4,7 @@
 
 **Concerning transcription, I initially used [OpenAI's Whisper](https://github.com/openai/whisper) package, but then moved on to the [WhisperX](https://github.com/m-bain/whisperX) package because it is faster, more accurate, does not suffer from timestamp drift, and includes speaker labels. WhisperX is still very much experimental and, thus, more complicated to install for the less tech-savvy. It also requires one to have a (somewhat) recent nVidia graphics card.**
 
-If you still wanna give it a try, I recommend having a look at its GitHub repo. For reference, I used the following parameter for transcribing:
+If you still wanna give it a try, I recommend having a look at its GitHub repo. For reference, I used the following parameters for transcribing (insert your own HF API token):
 
 ``` powershell
 whisperx audio.wav --model large-v2 --align_model WAV2VEC2_ASR_LARGE_LV60K_960H --diarize --min_speakers 3 --max_speakers 3 --hf_token [API-TOKEN]
