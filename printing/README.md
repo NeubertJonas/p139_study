@@ -33,8 +33,7 @@ You only need to run the following steps once to setup everything.
 
 Open a terminal/command line: In Windows, right-click within the folder and - while holding the Shift key - click "Open in Terminal". This opens an elevated terminal (i.e., running as administrator). This is only required the first time, because we need to change a security policy to allow execution of scripts. The path in the terminal should now be the newly created folder in which you placed all the files.
 
-For Mac instructions, see [here](https://support.apple.com/en-gb/guide/terminal/trmlb20c7888/mac#:~:text=Open%20new%20Terminal%20windows%20or%20tabs%20from%20the%20Finder&text=Control-click%20the%20folder%20in,New%20Terminal%20Tab%20at%20Folder). 
-_The following instructions have not been tested on Mac OS yet (see [issue #3](https://github.com/NeubertJonas/p139_study/issues/3))_
+For Mac instructions on how to open a terminal, see [here](https://support.apple.com/en-gb/guide/terminal/trmlb20c7888/mac#:~:text=Open%20new%20Terminal%20windows%20or%20tabs%20from%20the%20Finder&text=Control-click%20the%20folder%20in,New%20Terminal%20Tab%20at%20Folder). _NB: The following instructions have not been tested on Mac OS, so you might encounter different errors or might have to adapt the commands slightly to the Mac-equivalent of PowerShell / Terminal._
 
 Please execute the following commands individually by copying them and then pressing Enter.
 
