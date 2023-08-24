@@ -23,7 +23,8 @@ source("relationship_metrics.R")
 # No comma after the last item
 
 lsd_first <- c(
-  "P13903", "P13904" # Couple 2
+  "P13903", "P13904", # Couple 2
+  "P13913", "P13914" # Couple 5
 )
 
 
